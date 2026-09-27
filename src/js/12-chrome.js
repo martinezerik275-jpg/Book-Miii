@@ -1,12 +1,22 @@
 /* ================= overlays + keys ================= */
-const MODALS = ["#editor", "#settings", "#search", "#keys", "#logos", "#bdSheet"];
+const MODALS = ["#editor", "#settings", "#search", "#keys", "#logos", "#bdSheet", "#plaza", "#clinic", "#people", "#stampSheet", "#photoSheet", "#confirm"];
 function show(s) { $(s).classList.add("open"); syncModal(); }
 function hide(s) { $(s).classList.remove("open"); syncModal(); }
 function syncModal() { document.body.classList.toggle("modal-open", MODALS.some(m => $(m).classList.contains("open"))); }
 const anyOverlay = () => ["#start", "#preview", "#idle", ...MODALS].some(m => $(m).classList.contains("open"));
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") {
-    if ($("#editor").classList.contains("open")) { hide("#editor"); sfx("back"); }
+    if ($("#confirm").classList.contains("open")) closeConfirm(false);
+    else if ($("#photoSheet").classList.contains("open")) { hide("#photoSheet"); sfx("back"); }
+    else if ($("#stampSheet").classList.contains("open")) { hide("#stampSheet"); sfx("back"); }
+    else if ($("#clinic").classList.contains("open")) closeClinic();
+    else if ($("#people").classList.contains("open")) { hide("#people"); sfx("back"); }
+    else if ($("#plaza").classList.contains("open")) {
+      if (document.activeElement === $("#pzSay")) $("#pzCanvas").focus();
+      else if (!$("#pzCard").hidden) $("#pzCard").hidden = true;
+      else closePlaza();
+    }
+    else if ($("#editor").classList.contains("open")) { hide("#editor"); sfx("back"); }
     else if ($("#settings").classList.contains("open")) { hide("#settings"); sfx("back"); }
     else if ($("#search").classList.contains("open")) { hide("#search"); sfx("back"); }
     else if ($("#keys").classList.contains("open")) { hide("#keys"); sfx("back"); }
@@ -14,12 +24,14 @@ document.addEventListener("keydown", e => {
     else if ($("#bdSheet").classList.contains("open")) { hide("#bdSheet"); sfx("back"); }
     else if ($("#preview").classList.contains("open")) closePreview();
     else if (editMode) $("#editBtn").click();
+    else if (visiting) goHome(true);
     return;
   }
   if (anyOverlay()) return;
   if (e.target.matches("input,textarea,select")) return;
   if (e.key === "/") { e.preventDefault(); openSearch(); return; }
   if (e.key === "?") { e.preventDefault(); openKeys(); return; }
+  if ((e.key === "p" || e.key === "P") && !e.metaKey && !e.ctrlKey && room) { e.preventDefault(); openPlaza(); return; }
   if (e.key === "PageDown" || e.key === "]") { goPage(page + 1); return; }
   if (e.key === "PageUp" || e.key === "[") { goPage(page - 1); return; }
   if (e.key.startsWith("Arrow")) {
@@ -87,7 +99,7 @@ if (matchMedia("(pointer: fine)").matches) {
 function tick() {
   const d = new Date();
   $("#time").textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }).replace(/\s?[AP]M/i, "");
-  $("#date").textContent = d.toLocaleDateString([], { weekday: "short", month: "numeric", day: "numeric" });
+  if (!$("#date").dataset.focus) $("#date").textContent = d.toLocaleDateString([], { weekday: "short", month: "numeric", day: "numeric" });
   $("#idleTime").textContent = $("#time").textContent;
   $("#idleDate").textContent = d.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
   if (state) { applyLighting(); if (state.theme === "time") applyTheme(); }

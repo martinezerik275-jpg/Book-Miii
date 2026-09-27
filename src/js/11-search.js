@@ -42,5 +42,5 @@ $("#kClose").onclick = () => { hide("#keys"); sfx("back"); };
 $("#keys").addEventListener("click", e => { if (e.target.id === "keys") { hide("#keys"); sfx("back"); } });
 
 /* ================= edit mode ================= */
-$("#editBtn").onclick = () => { editMode = !editMode; sfx(editMode ? "confirm" : "back"); render(); toast(editMode ? "Edit mode on" : "Edit mode off"); };
+$("#editBtn").onclick = () => { if (visiting) return; editMode = !editMode; sfx(editMode ? "confirm" : "back"); render(); toast(editMode ? "Edit mode on" : "Edit mode off"); };
 

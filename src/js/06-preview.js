@@ -41,6 +41,10 @@ function openPreview(c, tile) {
   (c.tags || []).forEach(t => { const s = document.createElement("span"); s.className = "tag"; s.textContent = t; tg.appendChild(s); });
   $("#pvNotes").textContent = isFlow ? "" : (c.notes || "");
   if (!isFlow) $("#pvOpen").href = c.url;
+  if (visiting) {
+    $("#pvEdit").textContent = "Add to my space";
+    $("#pvEdit").hidden = !me.id || me.canWrite === false;
+  } else $("#pvEdit").hidden = false;
   show("#preview"); sfx("open", 0, tileWorld(c)); duckMusic(true);
   const banner = $("#banner");
   if (tile && !reduceMotion) {
@@ -63,8 +67,12 @@ $("#pvOpen").onclick = e => {
   if (c && c.kind === "flow") {
     if (!flowSteps(c).length) { e.preventDefault(); sfx("error"); toast("Add steps to this workflow first."); return; }
     hide("#preview"); duckMusic(false); startSession(c);
-  } else sfx("launch", 0, tileWorld(c));
+  } else { sfx("launch", 0, tileWorld(c)); workingIn(c); }
 };
 $("#pvSteps").addEventListener("pointerover", e => { const a = e.target.closest("a"); if (a && !a.contains(e.relatedTarget)) sfx("tick"); });
-$("#pvEdit").onclick = () => { const c = pvChannel; hide("#preview"); duckMusic(false); openEditor(c); };
+$("#pvEdit").onclick = () => {
+  const c = pvChannel;
+  if (visiting) { borrow(c); return; }
+  hide("#preview"); duckMusic(false); openEditor(c);
+};
 

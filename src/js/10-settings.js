@@ -35,8 +35,10 @@ function renderSettings() {
     up.onclick = () => { state.pages.splice(i - 1, 0, state.pages.splice(i, 1)[0]); save(); render(); renderSettings(); };
     const del = document.createElement("button"); del.className = "x"; del.textContent = "✕"; del.setAttribute("aria-label", "Delete page");
     del.disabled = state.pages.length === 1;
-    del.onclick = () => {
-      if (count && !confirm(`Delete "${p.name}"? Its ${count} channel(s) move to another page.`)) return;
+    del.onclick = async () => {
+      if (count && !await askConfirm(`Delete "${p.name}"? Its ${count} channel(s) move to another page.`, "Delete page")) return;
+      if (!state.pages.includes(p)) return;
+      i = state.pages.indexOf(p);
       state.pages.splice(i, 1); state.channels.forEach(c => { if (c.page === p.id) { c.page = state.pages[0].id; c.slot = -1; } });
       state = normalize(state); save(); render(); renderSettings();
     };
@@ -123,7 +125,7 @@ $("#stImportFile").onchange = async e => {
   try {
     const d = JSON.parse(await f.text());
     if (!Array.isArray(d.channels) || !Array.isArray(d.pages)) throw 0;
-    if (!confirm(`Replace your menu with ${d.channels.length} channels from this file?`)) return;
+    if (!await askConfirm(`Replace your menu with ${d.channels.length} channels from this file?`, "Replace")) return;
     state.pages = d.pages; state.channels = d.channels; state = normalize(state); save(); page = 0; render(); renderSettings(); toast("Channels imported");
   } catch { toast("That file isn't a Studio Menu export."); }
 };

@@ -188,7 +188,7 @@ async function filesFromDrop(dt) {
 }
 let dragDepth = 0;
 const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files");
-const logoDropAllowed = () => !["#start", "#editor", "#settings", "#search", "#keys", "#idle", "#bdSheet"].some(m => $(m).classList.contains("open"));
+const logoDropAllowed = () => !visiting && !["#start", "#idle", ...MODALS].filter(m => m !== "#logos").some(m => $(m).classList.contains("open"));
 addEventListener("dragenter", e => { if (!hasFiles(e) || !logoDropAllowed()) return; dragDepth++; if (!$("#logos").classList.contains("open")) $("#dropHint").classList.add("on"); });
 addEventListener("dragleave", e => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("#dropHint").classList.remove("on"); });
 addEventListener("dragover", e => { if (hasFiles(e) && logoDropAllowed()) e.preventDefault(); });

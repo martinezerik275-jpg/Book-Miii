@@ -1,0 +1,19 @@
+{
+  "assets": {},
+  "downloads": {},
+  "sample": {},
+  "user": { "scopes": ["profile"] },
+  "room": {},
+  "db": {
+    "rules": [
+      { "path": "", "read": "view", "write": "owner" },
+      { "path": "spaces", "read": "view", "write": "owner" },
+      { "path": "spaces/{self}", "write": "interact" },
+      { "path": "people", "read": "view", "write": "owner" },
+      { "path": "people/{self}", "write": "interact" },
+      { "path": "social", "read": "view", "write": "owner" },
+      { "path": "social/{self}", "write": "interact" },
+      { "path": "data/users/{self}", "write": "interact" }
+    ]
+  }
+}

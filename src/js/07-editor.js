@@ -144,10 +144,11 @@ function saveFlow() {
   toast(edTarget ? "Workflow saved" : "Workflow added");
 }
 function firstFree(pid) { for (let i = 0; i < PER; i++) if (!chAt(pid, i)) return i; return -1; }
-$("#edDelete").onclick = () => {
+$("#edDelete").onclick = async () => {
   if (!edTarget) return;
-  if (!confirm(`Delete "${edTarget.name}" from your menu?`)) return;
-  state.channels = state.channels.filter(c => c !== edTarget);
+  const target = edTarget;
+  if (!await askConfirm(`Delete "${target.name}" from your menu?`, "Delete")) return;
+  state.channels = state.channels.filter(c => c !== target);
   save(); hide("#editor"); sfx("back"); render(); toast("Channel deleted");
 };
 $("#edDraft").onclick = async () => {

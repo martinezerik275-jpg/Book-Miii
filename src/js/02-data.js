@@ -24,6 +24,8 @@ function normalize(s) {
   s.channels.forEach(c => {
     c.id = c.id || uid(); c.tags = Array.isArray(c.tags) ? c.tags : [];
     c.hue = Number.isFinite(+c.hue) ? +c.hue : 200;
+    // spaces can come from other people: only web links, never javascript: or data: URLs
+    if (typeof c.url !== "string" || !/^https?:\/\//i.test(c.url)) c.url = "";
     if (c.kind === "flow") { c.steps = Array.isArray(c.steps) ? c.steps.filter(x => x && x.ch) : []; c.url = ""; }
     if (!ids.has(c.page)) c.page = s.pages[0].id;
   });
@@ -43,19 +45,48 @@ function normalize(s) {
   });
   return s;
 }
+// Each person's space is cached per device under its own key, so a shared
+// computer (or an old cache of the owner's menu) never leaks into someone else's space.
+const lsKey = () => (me.id && !me.isOwner) ? "studio-menu-space-" + me.id : LS_KEY;
 function save() {
-  state.rev = (state.rev || 0) + 1;
-  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch {}
+  if (visiting) return;            // someone else's space is read-only
+  persist(state);
+}
+// The shared copy leaves channel notes out: they live in the private data/users/<id> doc.
+function sharedBody(s) {
+  const body = JSON.parse(JSON.stringify(s));
+  if (privRef) body.channels.forEach(c => { delete c.notes; });
+  return body;
+}
+function persist(s) {
+  s.rev = (s.rev || 0) + 1;
+  try { localStorage.setItem(lsKey(), JSON.stringify(s)); } catch {}
+  savePrivate(s);
+  updateMyCard(s);
   if (!ref) return;
+  const target = ref;
   saving = true; clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
-    try { await ref.set(JSON.parse(JSON.stringify(state))); }
+    try { await target.set(sharedBody(s)); if (me.canWrite === null) me.canWrite = true; }
     catch (e) {
-      toast(e && e.code === "invalid_argument" ? "You can view this menu, but only its owner can save changes."
-        : "Couldn't save to the cloud. Your changes are kept in this browser.");
+      if (e && e.code === "invalid_argument") {
+        me.canWrite = false; renderSocialChrome();
+        toast("You can look around, but saving a space needs Contributor access. Your changes stay in this browser.");
+      } else toast("Couldn't save to the cloud. Your changes are kept in this browser.");
     }
     setTimeout(() => { saving = false; }, 800);
   }, 450);
+}
+/* private notes: data/users/<id>/private = { notes: { <channelId>: text } } */
+let privSaved = "";
+function notesOf(s) { const n = {}; s.channels.forEach(c => { if (c.notes) n[c.id] = c.notes; }); return n; }
+function applyPrivateNotes(s) { if (s) s.channels.forEach(c => { if (privNotes[c.id] != null) c.notes = privNotes[c.id]; }); }
+function savePrivate(s) {
+  if (!privRef || !privLoaded) return;
+  const n = notesOf(s), j = JSON.stringify(n);
+  if (j === privSaved) return;
+  privSaved = j; privNotes = n;
+  privRef.set({ notes: n }).catch(() => { privSaved = ""; });
 }
 const byId = id => state.channels.find(c => c.id === id);
 const flowSteps = f => (f.steps || []).map(st => ({ ch: byId(st.ch), note: st.note || "" })).filter(x => x.ch && x.ch.kind !== "flow");

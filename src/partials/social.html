@@ -1,0 +1,139 @@
+<!-- visiting someone's space -->
+<div id="visitBar" role="region" aria-label="Visiting a space" hidden>
+  <span class="av-chip" id="vbChip" aria-hidden="true"></span>
+  <div class="vb-text"><b id="vbName"></b><span id="vbSub"></span></div>
+  <button class="pill small" id="vbStamp">Leave a stamp</button>
+  <button class="pill small" id="vbPlaza" hidden>Back to plaza</button>
+  <button class="pill small primary" id="vbHome">Go home</button>
+</div>
+
+<!-- plaza -->
+<div class="overlay" id="plaza" role="dialog" aria-modal="true" aria-label="Plaza">
+  <canvas id="pzCanvas" tabindex="0" aria-label="3D plaza. Use WASD or arrow keys to walk."></canvas>
+  <div id="pzLabels" aria-hidden="true"></div>
+  <div class="pz-top">
+    <div class="pz-title"><b>Plaza</b><span id="pzCount">Just you so far</span></div>
+    <div class="pz-tools">
+      <button class="pill small" id="pzClinic">Avatar Clinic</button>
+      <button class="pill small" id="pzPhoto">Take a photo</button>
+      <button class="pill small" id="pzPeople">People</button>
+      <button class="x pz-x" id="pzClose" aria-label="Leave the plaza">✕</button>
+    </div>
+  </div>
+  <button class="pill primary" id="pzPrompt" hidden></button>
+  <div class="pz-card" id="pzCard" hidden>
+    <b id="pcName"></b><span id="pcSub"></span>
+    <div class="row"><button class="pill small primary" id="pcVisit">Visit space</button><button class="pill small" id="pcWave">Wave</button><button class="pill small" id="pcMute">Mute</button></div>
+  </div>
+  <div class="pz-bottom">
+    <ol class="pz-log" id="pzLog" aria-live="polite" aria-label="Chat"></ol>
+    <form class="pz-chat" id="pzChat" autocomplete="off">
+      <input type="text" id="pzSay" maxlength="120" placeholder="Say something  ( Enter )" aria-label="Say something">
+      <button class="pill small primary" type="submit">Say</button>
+    </form>
+    <div class="pz-emotes" id="pzEmotes" role="group" aria-label="Emotes">
+      <button class="pill small" data-e="wave">Wave <kbd>1</kbd></button>
+      <button class="pill small" data-e="jump">Hop <kbd>2</kbd></button>
+      <button class="pill small" data-e="dance">Dance <kbd>3</kbd></button>
+      <button class="pill small" data-e="heart">Heart <kbd>4</kbd></button>
+      <button class="pill small" data-e="cheer">Cheer <kbd>5</kbd></button>
+    </div>
+  </div>
+  <p class="pz-hint" id="pzHint">WASD or arrow keys to walk · click the ground to walk there · drag to look around</p>
+  <div class="pz-loading" id="pzLoading"><div><div class="mark" aria-hidden="true"></div><b id="pzLoadText">Opening the plaza…</b></div></div>
+</div>
+
+<!-- avatar clinic -->
+<div class="overlay sheet-bg" id="clinic" role="dialog" aria-modal="true" aria-labelledby="clTitle">
+  <div class="sheet cl-sheet">
+    <div class="st-head"><div><h3 id="clTitle">Avatar Clinic</h3><p class="hint" style="margin:4px 0 0">Choose how you look in the plaza. Everyone there sees it.</p></div><button class="x" id="clClose" aria-label="Close">✕</button></div>
+    <div class="cl-body">
+      <div class="cl-stage"><canvas id="clCanvas" aria-label="Avatar preview. Drag to turn."></canvas><span class="cl-tag" id="clTag"></span></div>
+      <div class="cl-opts">
+        <div class="field"><span class="lbl">Animal</span><div class="cl-species" id="clSpecies"></div></div>
+        <div class="field"><span class="lbl">Fur</span><div class="swatches" id="clFur"></div></div>
+        <div class="field"><span class="lbl">Scrubs</span><div class="swatches" id="clScrubs"></div></div>
+        <div class="field"><span class="lbl">On your head</span><div class="seg wrap" id="clHat"></div></div>
+        <div class="field"><span class="lbl">Extra</span><div class="seg wrap" id="clExtra"></div></div>
+        <div class="field"><span class="lbl">Eyes</span><div class="seg wrap" id="clEyes"></div></div>
+        <div class="field"><label for="clNick">Nickname in the plaza</label><input type="text" id="clNick" maxlength="20" placeholder="Leave empty to use your name"></div>
+      </div>
+    </div>
+    <div class="lg-foot">
+      <button class="pill small" id="clRandom">Surprise me</button>
+      <span class="hint" id="clStatus"></span>
+      <span class="spacer"></span>
+      <button class="pill small" id="clCancel">Cancel</button>
+      <button class="pill small primary" id="clSave">Save avatar</button>
+    </div>
+  </div>
+</div>
+
+<!-- people: neighbors, stamp book, my space -->
+<div class="overlay sheet-bg" id="people" role="dialog" aria-modal="true" aria-labelledby="ppTitle">
+  <div class="sheet st-sheet pp-sheet">
+    <div class="st-head"><h3 id="ppTitle">People</h3><button class="x" id="ppClose" aria-label="Close">✕</button></div>
+    <div class="st-body">
+      <nav class="st-rail" role="tablist" aria-label="People sections" id="ppRail">
+        <button role="tab" data-tab="neighbors">Neighbors</button>
+        <button role="tab" data-tab="stamps">Stamp book <span class="count" id="ppStampCount"></span></button>
+        <button role="tab" data-tab="me">My space</button>
+      </nav>
+      <div class="st-panes">
+        <section class="st-pane" role="tabpanel" data-pane="neighbors" aria-label="Neighbors">
+          <h4>Neighbors</h4>
+          <p class="hint" style="margin-top:0">Spaces people have shared. Visit one to look around, borrow a channel, or leave a stamp.</p>
+          <div id="ppList"></div>
+        </section>
+        <section class="st-pane" role="tabpanel" data-pane="stamps" aria-label="Stamp book">
+          <h4>Stamp book</h4>
+          <p class="hint" style="margin-top:0">Stamps visitors left on your space.</p>
+          <div id="ppStamps"></div>
+        </section>
+        <section class="st-pane" role="tabpanel" data-pane="me" aria-label="My space">
+          <h4>Status</h4>
+          <div class="seg wrap" id="ppStatus"><button type="button" data-v="around">Around</button><button type="button" data-v="focus">Focusing</button><button type="button" data-v="break">On a break</button><button type="button" data-v="away">Away</button></div>
+          <p class="hint" id="ppStatusHint">Focusing starts a 25 minute timer. People in the plaza see your status.</p>
+          <label class="check"><input type="checkbox" id="ppShareNow"> Show which channel I'm working in</label>
+          <h4>Your space</h4>
+          <div class="field"><label for="ppTitleIn">Name</label><input type="text" id="ppTitleIn" maxlength="40" placeholder="Maya's studio"></div>
+          <div class="field"><label for="ppBlurb">About</label><textarea id="ppBlurb" maxlength="160" placeholder="What you make, what you're into"></textarea></div>
+          <label class="check"><input type="checkbox" id="ppListed"> List my space in Neighbors and give it a house in the plaza</label>
+          <p class="hint">Anyone who can open this menu can visit a listed space. Your notes on channels stay private to you.</p>
+          <div class="row" style="margin-top:6px"><button class="pill small primary" id="ppSave">Save</button><button class="pill small" id="ppAvatar">Edit avatar</button><span class="hint" id="ppMsg"></span></div>
+          <h4>Inviting friends</h4>
+          <p class="hint" style="margin-top:0" id="ppInvite"></p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- leave a stamp -->
+<div class="overlay sheet-bg" id="stampSheet" role="dialog" aria-modal="true" aria-labelledby="skTitle">
+  <form class="sheet sk-sheet" id="skForm" autocomplete="off">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px"><h3 id="skTitle" style="margin:0">Leave a stamp</h3><button type="button" class="x" id="skClose" aria-label="Close">✕</button></div>
+    <div class="stickers" id="skStickers" role="radiogroup" aria-label="Sticker"></div>
+    <div class="field" style="margin-top:14px"><label for="skNote">Note (optional)</label><input type="text" id="skNote" maxlength="80" placeholder="Love your texture links!"></div>
+    <p class="hint">One stamp per space. Leaving another replaces yours.</p>
+    <div class="sheet-actions"><button type="button" class="pill small" id="skCancel">Cancel</button><button type="submit" class="pill small primary" id="skSave">Stamp it</button></div>
+  </form>
+</div>
+
+<!-- photo -->
+<div class="overlay sheet-bg" id="photoSheet" role="dialog" aria-modal="true" aria-labelledby="phTitle">
+  <div class="sheet ph-sheet">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px"><h3 id="phTitle" style="margin:0">Plaza photo</h3><button class="x" id="phClose" aria-label="Close">✕</button></div>
+    <img id="phImg" alt="Photo of the plaza">
+    <div class="sheet-actions"><span class="hint" id="phHint"></span><span class="spacer"></span><button class="pill small" id="phRetake">Back to plaza</button><button class="pill small primary" id="phSave">Save photo</button></div>
+  </div>
+</div>
+
+<!-- in-page confirm (the artifact viewer blocks window.confirm) -->
+<div class="overlay sheet-bg" id="confirm" role="alertdialog" aria-modal="true" aria-labelledby="cfText">
+  <div class="sheet cf-sheet">
+    <p id="cfText"></p>
+    <div class="sheet-actions"><button class="pill small" id="cfNo">Cancel</button><button class="pill small primary" id="cfYes">OK</button></div>
+  </div>
+</div>
+

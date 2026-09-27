@@ -10,7 +10,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cat = dir => readdirSync(join(root, dir)).filter(f => !f.startsWith(".")).sort()
   .map(f => readFileSync(join(root, dir, f), "utf8")).join("");
 
-const tpl = readFileSync(join(root, "src/index.html"), "utf8");
+const tpl = readFileSync(join(root, "src/index.html"), "utf8")
+  .replace(/<!-- @include (\S+) -->\n/g, (_, f) => readFileSync(join(root, "src", f), "utf8"));
 const out = tpl
   .replace("<!-- @css -->\n", () => cat("src/css"))
   .replace("<!-- @js -->\n", () => cat("src/js"));

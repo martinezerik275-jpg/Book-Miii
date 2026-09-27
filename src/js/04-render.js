@@ -25,6 +25,9 @@ function render() {
     pg.appendChild(grid); track.appendChild(pg);
   });
   $("#menuEmpty").hidden = state.channels.length > 0;
+  $("#emptyMsg").textContent = visiting ? "Nothing here yet." : (me.id && !me.isOwner ? "This is your space. Add your first channel, or borrow some from your neighbors." : "Your menu is empty.");
+  $("#emptyAdd").hidden = !!visiting;
+  $("#emptyPeople").hidden = !!visiting || !db;
   if (page >= state.pages.length) page = state.pages.length - 1;
   document.body.classList.toggle("editing", editMode);
   $("#editBtn").classList.toggle("on", editMode);
@@ -80,12 +83,14 @@ track.addEventListener("click", e => {
   const b = e.target.closest(".slot"); if (!b) return;
   const c = b.dataset.id && state.channels.find(x => x.id === b.dataset.id);
   if (c && !editMode) openPreview(c, b);
+  else if (visiting) return;
   else if (c) openEditor(c);
   else openEditor(null, state.pages[+b.dataset.page].id, +b.dataset.slot);
 });
 $("#prev").onclick = () => goPage(page - 1);
 $("#next").onclick = () => goPage(page + 1);
 $("#emptyAdd").onclick = () => openEditor(null, state.pages[page].id, 0);
+$("#emptyPeople").onclick = () => openPeople("neighbors");
 
 // swipe
 let sx = null;
