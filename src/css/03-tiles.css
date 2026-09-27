@@ -1,0 +1,93 @@
+/* ---------- tiles ---------- */
+.slot{
+  position:relative;border:none;padding:0;border-radius:18px;min-width:0;min-height:0;
+  background:transparent;transition:transform .16s cubic-bezier(.3,1.6,.5,1);
+}
+.slot.empty{
+  background:var(--empty);
+  box-shadow:inset 0 0 0 2px var(--bezel), inset 0 2px 0 3px var(--bezel-hi);
+  opacity:.75;
+}
+.slot.empty .plus{
+  position:absolute;inset:0;display:grid;place-items:center;font-size:28px;font-weight:300;
+  color:var(--ink-soft);opacity:0;transition:opacity .15s
+}
+.slot.empty:hover .plus,.slot.empty:focus-visible .plus,.editing .slot.empty .plus{opacity:1}
+.slot.tile{
+  background:var(--tile);
+  box-shadow:inset 0 0 0 3px var(--bezel), inset 0 3px 0 4px var(--bezel-hi), 0 4px 10px var(--shadow);
+}
+.slot.tile::after, .slot.empty::after, .round::after, .arrow::after, .pill::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .16s;
+}
+.slot.tile::after{box-shadow:inset 0 0 0 3px var(--sel), 0 0 0 3px var(--sel), 0 0 26px 4px var(--sel-glow);z-index:3}
+.slot.empty::after{box-shadow:inset 0 0 0 2px var(--sel)}
+.round::after,.arrow::after,.pill::after{box-shadow:inset 0 0 0 3px var(--sel), 0 0 20px var(--sel-glow)}
+.pill.primary::after{box-shadow:0 0 0 4px var(--panel), 0 0 0 6px var(--sel), 0 0 26px var(--sel-glow)}
+.slot:hover::after,.slot:focus-visible::after,.round:hover::after,.round:focus-visible::after,
+.arrow:hover::after,.arrow:focus-visible::after,.pill:hover::after,.pill:focus-visible::after{opacity:1}
+.slot.tile:hover,.slot.tile:focus-visible{transform:scale(1.075);z-index:2;outline:none}
+.page.current .slot.tile{will-change:transform}
+.slot.empty:hover,.slot.empty:focus-visible{outline:none;opacity:1}
+.slot.tile:active{transform:scale(1.02)}
+.screen{
+  position:absolute;inset:7px;border-radius:12px;overflow:hidden;
+  background:linear-gradient(150deg,hsl(var(--h) 85% 76%),hsl(calc(var(--h) + 34) 72% 56%));
+}
+:root[data-theme="dark"] .screen{background:linear-gradient(150deg,hsl(var(--h) 60% 44%),hsl(calc(var(--h) + 34) 62% 30%))}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .screen{background:linear-gradient(150deg,hsl(var(--h) 60% 44%),hsl(calc(var(--h) + 34) 62% 30%))}}
+.screen::after{ /* glass sheen */
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.38) 0%,rgba(255,255,255,0) 46%);
+  pointer-events:none
+}
+.slot.tile:hover .screen::before,.slot.tile:focus-visible .screen::before{
+  content:"";position:absolute;inset:-40%;background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.45) 50%,transparent 60%);
+  animation:sweep .6s ease-out both;pointer-events:none;z-index:1
+}
+@keyframes sweep{from{transform:translateX(-50%)}to{transform:translateX(50%)}}
+
+/* settle loop: after the pop and sweep, the tile stays alive while hovered */
+.orbit{position:absolute;inset:0;border-radius:inherit;overflow:hidden;opacity:0;transition:opacity .25s;pointer-events:none}
+.orbit::before{
+  content:"";position:absolute;left:50%;top:50%;width:170%;aspect-ratio:1;translate:-50% -50%;
+  background:conic-gradient(transparent 0 28%, var(--sel-glow) 44%, var(--sel) 48.5%, #fff 49.5%, transparent 50%,
+                            transparent 78%, var(--sel-glow) 94%, var(--sel) 98.5%, #fff 99.5%, transparent 100%);
+}
+.slot.tile:hover .orbit,.slot.tile:focus-visible .orbit{opacity:1;transition-delay:.45s}
+.slot.tile:hover .orbit::before,.slot.tile:focus-visible .orbit::before{animation:orbit 3s linear infinite}
+@keyframes orbit{to{rotate:360deg}}
+.slot.tile:hover .glyph,.slot.tile:focus-visible .glyph{
+  animation:land .5s cubic-bezier(.3,1.7,.5,1) .45s both, bob 2.8s ease-in-out .95s infinite;will-change:transform
+}
+@keyframes land{0%{transform:scale(1)}55%{transform:scale(1.17) rotate(-4deg)}100%{transform:scale(1.07)}}
+@keyframes bob{0%,100%{transform:scale(1.07) translateY(0) rotate(0)}30%{transform:scale(1.09) translateY(-4%) rotate(-3deg)}70%{transform:scale(1.08) translateY(-2%) rotate(2.5deg)}}
+.slot.tile:hover::after,.slot.tile:focus-visible::after{animation:glowbreath 2.8s ease-in-out .95s infinite}
+@keyframes glowbreath{50%{opacity:.55}}
+.glyph{
+  position:absolute;inset:0 0 22% 0;display:grid;place-items:center;
+  font-size:clamp(22px,3.4vw,44px);font-weight:800;color:#fff;letter-spacing:-.02em;
+  text-shadow:0 2px 8px rgba(0,0,0,.18)
+}
+.glyph img{max-width:64%;max-height:72%;object-fit:contain;border-radius:8px;-webkit-user-drag:none;pointer-events:none}
+.nameplate{
+  position:absolute;left:0;right:0;bottom:0;padding:5px 10px 7px;
+  font-size:clamp(11px,1.05vw,14px);font-weight:700;color:#fff;
+  background:linear-gradient(0deg,rgba(0,0,0,.28),rgba(0,0,0,0));
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;z-index:2
+}
+.editing .page.current .slot.tile{animation:wobble .5s ease-in-out infinite alternate}
+.editing .page.current .slot.tile:nth-child(2n){animation-delay:-.25s}
+@keyframes wobble{from{rotate:-.6deg}to{rotate:.6deg}}
+.slot.drop-target{opacity:1;transform:scale(1.05)}
+.slot.drop-target::after{opacity:1}
+.slot.dragging{opacity:.3;animation:none !important}
+.editing .page.current .slot.tile{touch-action:none}
+.drag-ghost{position:fixed !important;left:0;top:0;z-index:90;pointer-events:none;margin:0;will-change:transform;
+  transition:none !important;animation:none !important;box-shadow:inset 0 0 0 3px var(--sel), 0 22px 44px var(--shadow) !important}
+.drag-ghost::after{opacity:1}
+.is-dragging, .is-dragging *{user-select:none}
+.is-dragging .arrow.right[hidden]{opacity:.75;pointer-events:auto}
+.is-dragging .arrow.right[hidden] svg{display:none}
+.is-dragging .arrow.right[hidden]::before{content:"+";font-size:30px;font-weight:300;color:var(--sel)}
+

@@ -1,0 +1,25 @@
+/* ---------- tabbed settings ---------- */
+.st-sheet{width:min(820px,100%);height:min(580px,100%);display:flex;flex-direction:column;padding:0;overflow:hidden}
+.st-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 12px 28px;border-bottom:2px solid var(--line)}
+.st-head h3{margin:0}
+.st-body{flex:1;min-height:0;display:grid;grid-template-columns:210px 1fr}
+.st-rail{display:flex;flex-direction:column;gap:4px;padding:14px 12px;border-right:2px solid var(--line);overflow-y:auto}
+.st-group{font-size:12px;font-weight:800;color:var(--ink-soft);padding:12px 12px 4px;letter-spacing:.02em}
+.st-group:first-child{padding-top:2px}
+.st-rail button{position:relative;border:none;background:none;text-align:left;font-size:15px;font-weight:700;color:var(--ink);padding:10px 14px;border-radius:14px;transition:background .15s, transform .15s cubic-bezier(.3,1.6,.5,1)}
+.st-rail button:hover{background:var(--field);transform:translateX(3px)}
+.st-rail button[aria-selected="true"]{background:var(--sel);color:#fff}
+.st-panes{min-height:0;overflow-y:auto;padding:6px 28px 24px}
+.st-pane{display:none;animation:paneIn .28s cubic-bezier(.2,.9,.25,1)}
+.st-pane.on{display:block}
+@keyframes paneIn{from{opacity:0;transform:translateY(8px)}}
+@media (max-width:640px){
+  .st-sheet{height:100%}
+  .st-body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .st-rail{flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:none;border-bottom:2px solid var(--line);padding:10px 12px}
+  .st-group{display:none}
+  .st-rail button{white-space:nowrap;flex:none}
+  .st-rail button:hover{transform:none}
+  .st-panes{padding:4px 18px 20px}
+}
+

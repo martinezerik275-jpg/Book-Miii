@@ -1,0 +1,14 @@
+/* idle screen */
+#idle{z-index:70;background:var(--bg);background-image:repeating-linear-gradient(0deg,var(--stripe) 0 2px,transparent 2px 6px);overflow:hidden}
+#idle.open{animation:idlein 1.2s ease both}
+@keyframes idlein{from{opacity:0}}
+.float-tile{position:absolute;left:0;top:0;width:var(--w);aspect-ratio:16/10;border-radius:16px;background:var(--tile);opacity:var(--o);
+  box-shadow:inset 0 0 0 3px var(--bezel), 0 12px 28px var(--shadow);animation:drift var(--d) ease-in-out var(--dl) infinite alternate;will-change:transform}
+.float-tile .screen{inset:6px;border-radius:11px}
+.float-tile .glyph{inset:0;font-size:calc(var(--w) * .26)}
+@keyframes drift{from{transform:translate3d(var(--x0),var(--y0),0) rotate(var(--r0))}to{transform:translate3d(var(--x1),var(--y1),0) rotate(var(--r1))}}
+.idle-clock{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+.idle-time{font-size:clamp(84px,15vw,190px);font-weight:300;line-height:1;letter-spacing:.01em;color:var(--ink);text-shadow:0 4px 30px var(--bg)}
+.idle-date{font-size:clamp(18px,2.2vw,26px);font-weight:500;color:var(--ink-soft);margin-top:10px;text-shadow:0 2px 16px var(--bg)}
+.idle-hint{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);text-align:center;color:var(--ink-soft);font-size:14px;margin:0;opacity:.8}
+

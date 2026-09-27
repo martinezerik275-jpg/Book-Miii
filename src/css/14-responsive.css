@@ -1,0 +1,15 @@
+@media (max-width:760px){
+  .page{padding:6px 16px}
+  .grid{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);aspect-ratio:auto;height:100%}
+  .arrow{width:34px;height:80px}
+  .arrow svg{width:16px;height:16px}
+  .status{padding:0 20px;font-size:14px}
+  .pv-info{grid-template-columns:1fr}
+  .pv-actions{flex-direction:row}
+  .pv-actions .pill{flex:1}
+  .cluster{gap:8px}
+}
+body.away *,body.away *::before,body.away *::after{animation-play-state:paused !important}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition-duration:.01ms !important}
+}

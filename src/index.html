@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Studio Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+<!-- @css -->
+</style>
+</head>
+<body>
+<div id="backdrop" aria-hidden="true"><div class="bd-media" id="bdMedia"></div><div class="bd-dim"></div></div>
+<div id="sky" aria-hidden="true"></div>
+<div id="app">
+  <div class="status" id="status" aria-live="polite"></div>
+  <div class="edit-tools"><div class="row"><button class="pill small" id="bdBtn" data-tip="Set a custom background image or video">Backdrop</button><button class="pill small" id="logosBtn" data-tip="Match a folder of logos to your tiles">Drop logos</button></div></div>
+  <div class="viewport" id="viewport">
+    <div class="track" id="track"></div>
+    <button class="arrow left" id="prev" aria-label="Previous page" data-tip="Previous page"><svg viewBox="0 0 24 24"><path d="M15 4 7 12l8 8"/></svg></button>
+    <button class="arrow right" id="next" aria-label="Next page" data-tip="Next page"><svg viewBox="0 0 24 24"><path d="m9 4 8 8-8 8"/></svg></button>
+    <div class="menu-empty" id="menuEmpty" hidden><div><p>Your menu is empty.</p><button class="pill small primary" id="emptyAdd">Add a channel</button></div></div>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="deck">
+    <div class="cluster">
+      <button class="round" id="editBtn" aria-label="Edit channels" data-tip="Edit channels"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
+      <button class="round" id="idleBtn" aria-label="Idle screen" data-tip="Idle screen"><svg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12"/><path d="M7.5 3c0 4.5 4.5 5.5 4.5 9s-4.5 4.5-4.5 9M16.5 3c0 4.5-4.5 5.5-4.5 9s4.5 4.5 4.5 9"/><path d="M9.5 19h5M10.5 7.5h3"/></svg></button>
+      <button class="round" id="searchBtn" aria-label="Search channels" data-tip="Search  ( / )"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button>
+    </div>
+    <div class="clock" aria-hidden="true"><div class="time" id="time">--:--</div><div class="date" id="date"></div></div>
+    <div class="cluster">
+      <button class="round" id="keysBtn" aria-label="Shortcuts" data-tip="Shortcuts  ( ? )"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h1M10.5 10h1M14.5 10h1M18 10h-.5M7 14h10"/></svg></button>
+      <button class="round" id="musicBtn" aria-label="Music on or off" data-tip="Music"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></button>
+      <button class="round" id="settingsBtn" aria-label="Settings" data-tip="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- start screen -->
+<div class="overlay open" id="start" role="dialog" aria-label="Start">
+  <div>
+    <div class="mark" aria-hidden="true"></div>
+    <h1>Studio Menu</h1>
+    <p>Your tools, one click away.</p>
+    <button class="begin" id="beginBtn">Click to begin</button>
+  </div>
+</div>
+
+<!-- preview -->
+<div class="overlay" id="preview" role="dialog" aria-modal="true" aria-labelledby="pvName">
+  <div class="pv-wrap">
+    <div class="banner" id="banner"><div class="screen" id="pvScreen"><div class="rings"></div><div class="glyph" id="pvGlyph"></div><div class="route" id="pvRoute"></div></div></div>
+    <div class="pv-info">
+      <div>
+        <h2 id="pvName"></h2>
+        <div class="pv-domain" id="pvDomain"></div>
+        <p class="pv-desc" id="pvDesc"></p>
+        <div class="tags" id="pvTags"></div>
+        <ol class="pv-steps" id="pvSteps"></ol>
+        <div class="pv-notes" id="pvNotes"></div>
+      </div>
+      <div class="pv-actions">
+        <a class="pill primary" id="pvOpen" target="_blank" rel="noopener noreferrer">Open site</a>
+        <button class="pill" id="pvBack">Back to menu</button>
+        <button class="pill small" id="pvEdit">Edit channel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- editor -->
+<div class="overlay sheet-bg" id="editor" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+  <form class="sheet" id="edForm" autocomplete="off" novalidate>
+    <h3 id="edTitle">Add channel</h3>
+    <div class="seg kind-seg" id="edKind"><button type="button" data-v="channel">Channel</button><button type="button" data-v="flow">Workflow</button></div>
+    <div class="field"><label for="edName">Name</label><input type="text" id="edName" maxlength="60"></div>
+    <div class="field only-ch"><label for="edUrl">Link</label><input type="text" id="edUrl" inputmode="url" placeholder="example.com or https://…"></div>
+    <div class="field">
+      <label for="edDesc" id="edDescLbl">What it's for</label>
+      <textarea id="edDesc" maxlength="400" placeholder="One or two lines you'll read when you open this channel"></textarea>
+      <div class="row only-ch"><button type="button" class="pill small" id="edDraft" hidden>Draft with Claude</button><span class="hint" id="edDraftHint"></span></div>
+    </div>
+    <div class="field only-flow"><span class="lbl">Steps</span><div id="edSteps"></div>
+      <div class="row"><button type="button" class="pill small" id="edAddStep">Add step</button></div>
+      <span class="hint">During a session the steps open in this order. A note reminds you what to do there.</span></div>
+    <div class="field"><label for="edTags">Tags</label><input type="text" id="edTags" placeholder="free, needs login, textures"><span class="hint">Separate with commas. Tags also pick the tile's sound world.</span>
+      <div class="world-line" id="edWorld"></div></div>
+    <div class="field only-ch"><label for="edNotes">Your notes</label><textarea id="edNotes" maxlength="1000" placeholder="Logins, favorite pages, when to use it"></textarea></div>
+    <div class="row split">
+      <div class="field"><label for="edPage">Page</label><select id="edPage"></select></div>
+      <div class="field"><label for="edIcon">Icon</label><input type="text" id="edIcon" maxlength="4" placeholder="Emoji or letters"></div>
+    </div>
+    <div class="field">
+      <span class="lbl">Color</span>
+      <div class="row" style="flex-wrap:nowrap">
+        <div class="mini" id="edMini"><div class="screen"><div class="glyph"></div></div></div>
+        <input type="range" class="hue-range" id="edHue" min="0" max="359" aria-label="Tile color">
+      </div>
+    </div>
+    <div class="field" id="edStyleRow" hidden><span class="lbl">Icon style</span>
+      <div class="seg" id="edStyle"><button type="button" data-v="app">App icon</button><button type="button" data-v="color">On color</button><button type="button" data-v="white">On white</button></div></div>
+    <div class="row" id="edImgRow">
+      <button type="button" class="pill small" id="edImgBtn">Use an image as icon</button>
+      <button type="button" class="pill small" id="edImgClear" hidden>Remove image</button>
+      <input type="file" id="edImgFile" accept="image/*" hidden>
+    </div>
+    <p class="form-err" id="edErr" role="alert" hidden></p>
+    <div class="sheet-actions">
+      <button type="button" class="pill small danger" id="edDelete">Delete</button>
+      <span class="spacer"></span>
+      <button type="button" class="pill small" id="edCancel">Cancel</button>
+      <button type="submit" class="pill small primary" id="edSave">Save channel</button>
+    </div>
+  </form>
+</div>
+
+<!-- settings -->
+<div class="overlay sheet-bg" id="settings" role="dialog" aria-modal="true" aria-labelledby="stTitle">
+  <div class="sheet st-sheet">
+    <div class="st-head"><h3 id="stTitle">Settings</h3><button class="x" id="stClose" aria-label="Close settings">✕</button></div>
+    <div class="st-body">
+      <nav class="st-rail" role="tablist" aria-orientation="vertical" aria-label="Settings sections">
+        <span class="st-group">Audio</span>
+        <button role="tab" data-tab="music">Music &amp; volume</button>
+        <button role="tab" data-tab="effects">Sound effects</button>
+        <button role="tab" data-tab="worlds">Sound worlds</button>
+        <span class="st-group">Visual</span>
+        <button role="tab" data-tab="look">Appearance</button>
+        <button role="tab" data-tab="idle">Idle screen</button>
+        <span class="st-group">Menu</span>
+        <button role="tab" data-tab="pages">Pages</button>
+        <button role="tab" data-tab="backup">Backup</button>
+      </nav>
+      <div class="st-panes">
+        <section class="st-pane" role="tabpanel" data-pane="music" aria-label="Music and volume">
+          <h4>Volume</h4>
+          <div class="field"><label for="stMusicVol">Music</label><input type="range" id="stMusicVol" min="0" max="1" step="0.01"></div>
+          <div class="field"><label for="stSfxVol">Sound effects</label><input type="range" id="stSfxVol" min="0" max="1" step="0.01"></div>
+          <h4>Music track</h4>
+          <div class="list-row"><div class="name" id="stMusicName"></div>
+            <button class="pill small" id="stMusicUp" hidden>Upload</button>
+            <button class="pill small" id="stMusicReset" hidden>Use built-in</button></div>
+          <input type="file" id="stMusicFile" accept="audio/*" hidden>
+          <h4>Behavior</h4>
+          <label class="check"><input type="checkbox" id="stAway"> Pause music when I switch to another tab</label>
+        </section>
+
+        <section class="st-pane" role="tabpanel" data-pane="effects" aria-label="Sound effects">
+          <h4>Sound effects</h4>
+          <div id="stSfx"></div>
+          <input type="file" id="stSfxFile" accept="audio/*" hidden>
+          <p class="hint" id="stUploadHint"></p>
+          <label class="check" style="margin-top:14px"><input type="checkbox" id="stTune"> Tune the hover sound to each tile's position</label>
+        </section>
+
+        <section class="st-pane" role="tabpanel" data-pane="worlds" aria-label="Sound worlds">
+          <h4>Sound worlds</h4>
+          <p class="hint" style="margin-top:0">Each tile plays the instrument of the first world matching one of its tags. You can also tag a tile with a world's name, like "marimba".</p>
+          <label class="check" style="margin:4px 0 10px"><input type="checkbox" id="stFollow"> Built-in music follows each page's sound world</label>
+          <div id="stWorlds"></div>
+        </section>
+
+        <section class="st-pane" role="tabpanel" data-pane="look" aria-label="Appearance">
+          <h4>Theme</h4>
+          <div class="seg" id="stTheme"><button data-v="auto">Auto</button><button data-v="light">Light</button><button data-v="dark">Dark</button><button data-v="time">Time of day</button></div>
+          <p class="hint">Auto follows your system. Time of day switches to dark in the evening and back to light in the morning.</p>
+          <h4>Backdrop</h4>
+          <p class="hint" style="margin-top:0">Put your own image or short video behind the menu.</p>
+          <div class="row"><button class="pill small" id="stBackdrop">Change backdrop</button></div>
+          <h4>Logos</h4>
+          <p class="hint" style="margin-top:0">Drop a folder of logo images and they're matched to your tiles by name.</p>
+          <div class="row"><button class="pill small" id="stLogos">Drop logos</button></div>
+          <h4>Lighting</h4>
+          <label class="check"><input type="checkbox" id="stLight"> Time-of-day lighting: the sky tint follows the hour</label>
+        </section>
+
+        <section class="st-pane" role="tabpanel" data-pane="idle" aria-label="Idle screen">
+          <h4>Idle screen</h4>
+          <label class="check"><input type="checkbox" id="stIdle"> Show the idle screen when I'm away</label>
+          <div class="row" style="margin-top:12px"><label for="stIdleMins" class="hint" style="font-size:15px">After</label>
+            <div class="field" style="margin:0;width:170px"><select id="stIdleMins"><option value="2">2 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select></div></div>
+          <p class="hint">The hourglass button on the menu starts it any time.</p>
+          <div class="row" style="margin-top:8px"><button class="pill small" id="stIdleNow">Show it now</button></div>
+        </section>
+
+        <section class="st-pane" role="tabpanel" data-pane="pages" aria-label="Pages">
+          <h4>Pages</h4>
+          <div id="stPages"></div>
+          <div class="row" style="margin-top:12px"><button class="pill small" id="stAddPage">Add page</button></div>
+        </section>
+
+        <section class="st-pane" role="tabpanel" data-pane="backup" aria-label="Backup">
+          <h4>Backup</h4>
+          <p class="hint" style="margin-top:0">Export saves your channels, workflows, notes and pages as a file. Uploaded sounds and images stay here.</p>
+          <p class="sync" id="stSync"></p>
+          <div class="row"><button class="pill small" id="stExport">Export channels</button><button class="pill small" id="stImport">Import channels</button><input type="file" id="stImportFile" accept="application/json,.json" hidden></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- backdrop -->
+<div class="overlay sheet-bg" id="bdSheet" role="dialog" aria-modal="true" aria-labelledby="bdTitle">
+  <div class="sheet bd-sheet">
+    <div class="row" style="justify-content:space-between;margin-bottom:14px"><h3 id="bdTitle" style="margin:0">Backdrop</h3><button class="x" id="bdClose" aria-label="Close backdrop">✕</button></div>
+    <div class="bd-preview" id="bdPreview">
+      <div class="bd-media" id="bdPrevMedia"></div><div class="bd-dim" id="bdPrevDim"></div>
+      <div class="bd-ghosts" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="bd-empty" id="bdEmpty"><div><b>Drop an image or video here</b><span>PNG, JPG, WebP, GIF, MP4 or WebM up to 20 MB</span></div></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="pill small primary" id="bdPick">Import file</button>
+      <button class="pill small danger" id="bdRemove">Remove backdrop</button>
+      <span class="hint" id="bdStatus"></span>
+      <input type="file" id="bdFile" accept="image/*,video/mp4,video/webm" hidden>
+    </div>
+    <div class="bd-controls" id="bdControls">
+      <div class="field"><span class="lbl">Fit</span>
+        <div class="seg" id="bdFit"><button type="button" data-v="cover">Fill</button><button type="button" data-v="contain">Fit</button><button type="button" data-v="tile">Tile</button></div></div>
+      <div class="field"><label for="bdDim">Fade into the menu</label><input type="range" id="bdDim" min="0" max="0.85" step="0.01"></div>
+      <div class="field"><label for="bdBlur">Soften</label><input type="range" id="bdBlur" min="0" max="24" step="1"></div>
+      <div class="field"><span class="lbl">Texture</span><label class="check"><input type="checkbox" id="bdLines"> Scanlines over the backdrop</label></div>
+    </div>
+    <p class="hint">Fade and Soften help tiles stay readable over busy images. Videos play muted on a loop and pause when you switch tabs.</p>
+  </div>
+</div>
+
+<!-- drop logos -->
+<div class="overlay sheet-bg" id="logos" role="dialog" aria-modal="true" aria-labelledby="lgTitle">
+  <div class="sheet lg-sheet">
+    <div class="st-head"><div><h3 id="lgTitle">Drop logos</h3><p id="lgSub">Name each file after its tile, like "Artlist.png".</p></div><button class="x" id="lgClose" aria-label="Close">✕</button></div>
+    <div class="lg-body" id="lgBody"></div>
+    <div class="lg-foot">
+      <button class="pill small" id="lgMore">Add more files</button>
+      <div class="lg-progress" id="lgProg"><i></i></div>
+      <span class="spacer"></span>
+      <button class="pill small" id="lgCancel">Cancel</button>
+      <button class="pill small primary" id="lgApply" disabled>Apply logos</button>
+    </div>
+    <input type="file" id="lgFiles" accept="image/*" multiple hidden>
+    <input type="file" id="lgFolder" webkitdirectory multiple hidden>
+  </div>
+</div>
+<div id="dropHint" aria-hidden="true"><div>Drop logos here<span>They'll be matched to your tiles by name</span></div></div>
+
+<!-- shortcuts -->
+<div class="overlay sheet-bg" id="keys" role="dialog" aria-modal="true" aria-labelledby="kTitle">
+  <div class="sheet keys-sheet">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 id="kTitle" style="margin:0">Shortcuts</h3><button class="x" id="kClose" aria-label="Close shortcuts">✕</button></div>
+    <div class="keys-list">
+      <div><span><kbd>/</kbd></span>Search your channels</div>
+      <div><span><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd></span>Move between tiles</div>
+      <div><span><kbd>Enter</kbd></span>Open the selected tile's banner</div>
+      <div><span><kbd>[</kbd><kbd>]</kbd></span>Previous or next page</div>
+      <div><span><kbd>Esc</kbd></span>Go back, close a panel, or leave edit mode</div>
+      <div><span><kbd>?</kbd></span>Show this list</div>
+    </div>
+    <h4>With the mouse</h4>
+    <div class="keys-list">
+      <div><span>Scroll</span>Turn pages</div>
+      <div><span>Swipe</span>Turn pages on touch screens</div>
+      <div><span>Drag</span>Rearrange tiles in edit mode. Hold at the screen edge or a page dot to move a tile to another page</div>
+      <div><span>Click empty slot</span>Add a channel or workflow there</div>
+      <div><span>Hourglass</span>Show the idle screen now</div>
+    </div>
+  </div>
+</div>
+
+<!-- search -->
+<div class="overlay" id="search" role="dialog" aria-modal="true" aria-label="Search channels">
+  <div class="search-box">
+    <input type="text" id="sInput" placeholder="Search channels, tags, notes" aria-label="Search">
+    <div class="results" id="sResults"></div>
+  </div>
+</div>
+
+<!-- idle -->
+<div class="overlay" id="idle" aria-hidden="true">
+  <div class="idle-sky"></div>
+  <div id="idleFloat"></div>
+  <div class="idle-clock"><div class="idle-time" id="idleTime"></div><div class="idle-date" id="idleDate"></div></div>
+  <p class="idle-hint">Move the mouse or press any key to come back</p>
+</div>
+
+<!-- session dock -->
+<div id="session" role="region" aria-label="Workflow session" hidden>
+  <span class="flow-icon" id="sesIcon" style="position:static;font-size:20px"></span>
+  <b class="ses-name" id="sesName"></b>
+  <div class="ses-steps" id="sesSteps"></div>
+  <a class="pill small primary" id="sesNext" target="_blank" rel="noopener noreferrer"></a>
+  <span class="ses-time" id="sesTime">0:00</span>
+  <button class="x" id="sesEnd" aria-label="End session" data-tip="End session">✕</button>
+</div>
+
+<div id="cursor" aria-hidden="true"></div>
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+"use strict";
+<!-- @js -->
+})();
+</script>
+</body>
+</html>

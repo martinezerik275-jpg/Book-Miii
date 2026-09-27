@@ -1,0 +1,50 @@
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#E8ECF0; --stripe:rgba(255,255,255,.6);
+  --tile:#FDFEFF; --bezel:#C5CDD6; --bezel-hi:#FFFFFF;
+  --ink:#38404B; --ink-soft:#76818D;
+  --sel:#27B4E8; --sel-glow:rgba(39,180,232,.45);
+  --deck:#D9DFE6; --deck-edge:#BAC4CE;
+  --panel:#F6F8FA; --field:#FFFFFF; --line:#D3DAE1;
+  --shadow:rgba(40,60,85,.16);
+  --empty:rgba(255,255,255,.45);
+  --danger:#D6455B;
+  --font:"M PLUS Rounded 1c", "Nunito", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  font-family:var(--font); color:var(--ink);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131820; --stripe:rgba(255,255,255,.022);
+    --tile:#1F2630; --bezel:#333D49; --bezel-hi:#46515E;
+    --ink:#DDE4EC; --ink-soft:#8D98A5;
+    --sel:#43C4F2; --sel-glow:rgba(67,196,242,.4);
+    --deck:#1A2029; --deck-edge:#2D3641;
+    --panel:#1C232C; --field:#151B22; --line:#2E3742;
+    --shadow:rgba(0,0,0,.45); --empty:rgba(255,255,255,.03);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131820; --stripe:rgba(255,255,255,.022);
+  --tile:#1F2630; --bezel:#333D49; --bezel-hi:#46515E;
+  --ink:#DDE4EC; --ink-soft:#8D98A5;
+  --sel:#43C4F2; --sel-glow:rgba(67,196,242,.4);
+  --deck:#1A2029; --deck-edge:#2D3641;
+  --panel:#1C232C; --field:#151B22; --line:#2E3742;
+  --shadow:rgba(0,0,0,.45); --empty:rgba(255,255,255,.03);
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]:not(.arrow){display:none !important}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;height:100%;overflow:hidden;background:var(--bg);
+  background-image:repeating-linear-gradient(0deg,var(--stripe) 0 2px,transparent 2px 6px);
+  -webkit-font-smoothing:antialiased; user-select:none;
+}
+button,input,textarea,select{font-family:inherit;color:inherit}
+button{cursor:pointer}
+.custom-cursor, .custom-cursor button, .custom-cursor a{cursor:none}
+.custom-cursor.modal-open, .custom-cursor.modal-open button, .custom-cursor.modal-open a{cursor:auto}
+:focus-visible{outline:3px solid var(--sel);outline-offset:3px}
+

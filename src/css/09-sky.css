@@ -1,0 +1,7 @@
+/* ---------- time-of-day sky ---------- */
+#sky,.idle-sky{position:fixed;inset:0;pointer-events:none;background:linear-gradient(180deg,var(--sky-a,transparent),var(--sky-b,transparent))}
+#sky{z-index:0;opacity:0;transition:opacity 2s}
+body.lit #sky{opacity:var(--sky-o,0)}
+#app{z-index:1}
+.idle-sky{position:absolute;opacity:var(--sky-o,0)}
+

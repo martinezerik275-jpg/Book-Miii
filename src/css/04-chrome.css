@@ -1,0 +1,60 @@
+/* ---------- side arrows ---------- */
+.arrow{
+  position:absolute;top:50%;translate:0 -50%;width:58px;height:112px;border:none;z-index:5;
+  background:var(--panel);box-shadow:0 4px 14px var(--shadow), inset 0 0 0 2px var(--bezel);
+  display:grid;place-items:center;transition:transform .15s cubic-bezier(.3,1.6,.5,1), opacity .2s;
+}
+.arrow svg{width:22px;height:22px;stroke:var(--sel);stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.arrow.left{left:0;border-radius:0 56px 56px 0}
+.arrow.right{right:0;border-radius:56px 0 0 56px}
+.arrow:hover,.arrow:focus-visible{transform:scale(1.08);outline:none}
+.arrow[hidden]{display:grid;opacity:0;pointer-events:none}
+
+/* ---------- dots ---------- */
+.dots{display:flex;justify-content:center;gap:10px;height:26px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;border:none;padding:0;background:var(--bezel);transition:transform .15s, background .2s}
+.dot.on{background:var(--sel);transform:scale(1.25)}
+.dot:hover{transform:scale(1.4)}
+
+/* ---------- deck ---------- */
+.deck{position:relative;height:clamp(118px,17vh,150px);display:flex;align-items:center;justify-content:space-between;padding:10px clamp(16px,4vw,48px) 0}
+.deck::before{
+  content:"";position:absolute;left:-8%;right:-8%;top:18px;bottom:-60px;
+  background:var(--deck);border-top:2px solid var(--deck-edge);
+  border-radius:50% 50% 0 0 / 46px 46px 0 0;box-shadow:0 -6px 20px var(--shadow);
+}
+.deck > *{position:relative}
+.cluster{display:flex;gap:14px}
+.round{
+  width:clamp(58px,7vw,76px);aspect-ratio:1;border-radius:50%;border:none;
+  background:var(--panel);box-shadow:inset 0 0 0 3px var(--bezel), inset 0 3px 0 4px var(--bezel-hi), 0 6px 14px var(--shadow);
+  display:grid;place-items:center;position:relative;transition:transform .15s cubic-bezier(.3,1.6,.5,1)
+}
+.round svg{width:44%;height:44%;fill:none;stroke:var(--ink-soft);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.round:hover,.round:focus-visible{transform:scale(1.1);outline:none}
+.round:hover svg,.round:focus-visible svg,.round.on svg{stroke:var(--sel)}
+.clock{text-align:center;line-height:1}
+.clock .time{font-size:clamp(34px,5vw,54px);font-weight:300;letter-spacing:.02em;color:var(--ink-soft)}
+.clock .date{font-size:clamp(13px,1.4vw,16px);font-weight:500;color:var(--ink-soft);margin-top:6px}
+
+/* ---------- tooltip ---------- */
+.tip{
+  position:fixed;z-index:60;pointer-events:none;background:var(--panel);color:var(--ink);font-size:13px;font-weight:700;
+  padding:6px 12px;border-radius:999px;box-shadow:0 4px 14px var(--shadow), inset 0 0 0 2px var(--bezel);
+  opacity:0;transform:translate(-50%,6px);transition:opacity .12s, transform .12s;white-space:nowrap
+}
+.tip.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- cursor ---------- */
+#cursor{
+  position:fixed;left:0;top:0;will-change:transform;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;z-index:100;pointer-events:none;
+  border:3px solid var(--ink-soft);background:rgba(255,255,255,.25);
+  transition:width .15s,height .15s,margin .15s,border-color .15s,background .15s, opacity .2s;opacity:0
+}
+#cursor::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:var(--ink-soft);transition:background .15s}
+#cursor.hot{width:40px;height:40px;margin:-20px 0 0 -20px;border-color:var(--sel);background:rgba(39,180,232,.14)}
+#cursor.hot::after{background:var(--sel)}
+#cursor.down{width:30px;height:30px;margin:-15px 0 0 -15px}
+.custom-cursor #cursor{opacity:1}
+.custom-cursor.modal-open #cursor{opacity:0}
+
