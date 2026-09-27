@@ -112,7 +112,7 @@ Objects or Colyseus and don't fit inside an artifact.
 
 ## Artifacts
 
-- Live (pinned): https://claude.ai/artifact/PHzcJUDEgTroYfg1cyVQbY. The pre-spaces version is still running there.
+- Live (pinned): https://claude.ai/artifact/PHzcJUDEgTroYfg1cyVQbY. Spaces + plaza release published as version 12 (2026-09-27).
 - Preview (private until shared): https://claude.ai/artifact/AqsumdzGWvdxzuPWFjfavi. Seeded with a copy of the live
   menu (channels and 12 icons; notes left out). Publish it with `<title>Studio Menu Preview</title>` so the two
   artifacts are easy to tell apart.
