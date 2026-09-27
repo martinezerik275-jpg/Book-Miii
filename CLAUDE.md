@@ -1,7 +1,8 @@
 # Studio Menu
 
 A Wii-menu-style bookmark launcher published as a claude.ai **artifact**, now with
-per-person spaces and a shared 3D plaza. See `docs/ARCHITECTURE.md` for the design.
+per-person spaces and a shared 3D plaza. See `docs/ARCHITECTURE.md` for the design and
+`docs/ROADMAP.md` for priorities: bookmarks and creative workflow first, social later.
 
 ## Layout
 - `src/index.html`: page shell. `<!-- @css -->`, `<!-- @js -->`, `<!-- @include partials/x.html -->` are build markers.
