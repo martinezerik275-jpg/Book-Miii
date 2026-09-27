@@ -1,0 +1,56 @@
+<!-- import browser bookmarks -->
+<div class="overlay sheet-bg" id="bmSheet" role="dialog" aria-modal="true" aria-labelledby="bmTitle">
+  <div class="sheet lg-sheet">
+    <div class="st-head"><div><h3 id="bmTitle">Import bookmarks</h3><p id="bmHint"></p></div><button class="x" id="bmClose" aria-label="Close">✕</button></div>
+    <div class="lg-body" id="bmList"></div>
+    <div class="lg-foot"><span class="spacer"></span><button class="pill small" id="bmCancel">Cancel</button><button class="pill small primary" id="bmGo">Import</button></div>
+  </div>
+</div>
+
+<!-- a stack opened: its tiles in a small grid -->
+<div class="overlay sheet-bg" id="stackSheet" role="dialog" aria-modal="true" aria-labelledby="skName">
+  <div class="sheet sk-view">
+    <div class="st-head"><div><h3 id="skName"></h3><p class="hint" id="skDesc" style="margin:4px 0 0"></p></div>
+      <div class="row"><button class="pill small" id="skEdit">Edit stack</button><button class="x" id="skClose" aria-label="Close stack">✕</button></div></div>
+    <div class="sk-grid" id="skGrid"></div>
+    <p class="hint sk-tip" id="skTip">Drag any tile onto this stack in edit mode to put it inside.</p>
+  </div>
+</div>
+
+<!-- end of a workflow session -->
+<div class="overlay sheet-bg" id="sesDoneSheet" role="dialog" aria-modal="true" aria-labelledby="sdTitle">
+  <form class="sheet sd-sheet" id="sdForm" autocomplete="off">
+    <h3 id="sdTitle">Session complete</h3>
+    <p class="sd-sum" id="sdSum"></p>
+    <div class="field"><label for="sdNote">What got done? (optional)</label><input type="text" id="sdNote" maxlength="140" placeholder="Rough cut to client, v2 grade"></div>
+    <p class="hint">Saved to this workflow's history. Only you can see it.</p>
+    <div class="sheet-actions"><button type="button" class="pill small" id="sdSkip">Don't log it</button><button type="submit" class="pill small primary">Save to history</button></div>
+  </form>
+</div>
+
+<!-- a project opened -->
+<div class="overlay sheet-bg" id="projSheet" role="dialog" aria-modal="true" aria-labelledby="pjName">
+  <div class="sheet pj-sheet">
+    <div class="pj-banner" id="pjBanner"><div class="screen" id="pjScreen"></div>
+      <div class="pj-head"><h2 id="pjName"></h2><div class="pj-meta" id="pjMeta"></div></div>
+      <button class="x pj-x" id="pjClose" aria-label="Close project">✕</button></div>
+    <div class="pj-body">
+      <div class="pj-main">
+        <p class="pj-desc" id="pjDesc"></p>
+        <div class="seg wrap" id="pjStatus" role="group" aria-label="Status"><button type="button" data-v="planning">Planning</button><button type="button" data-v="active">In progress</button><button type="button" data-v="review">In review</button><button type="button" data-v="delivered">Delivered</button></div>
+        <h4>Pinned</h4><div class="pj-pins" id="pjPins"></div>
+        <h4>Files and links</h4><ul class="pj-files" id="pjFiles"></ul>
+        <h4>Moodboard</h4>
+        <div class="pj-board" id="pjBoard"></div>
+        <div class="row"><button class="pill small" id="pjAddImg">Add images</button><input type="file" id="pjImgFile" accept="image/*" multiple hidden><span class="hint" id="pjImgHint"></span></div>
+        <h4>Notes</h4><div class="pv-notes" id="pjNotes"></div>
+      </div>
+      <aside class="pj-side">
+        <button class="pill primary" id="pjStart">Start session</button>
+        <button class="pill small" id="pjEdit">Edit project</button>
+        <div class="pj-time"><b id="pjTotal"></b><span id="pjTotalSub"></span></div>
+        <ol class="pj-log" id="pjLog"></ol>
+      </aside>
+    </div>
+  </div>
+</div>

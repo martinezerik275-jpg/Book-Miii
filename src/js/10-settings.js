@@ -3,6 +3,7 @@ const SFX_KINDS = [["hover", "Hover"], ["open", "Open channel"], ["back", "Back"
 let sfxUploadKind = null;
 function openSettings() { renderSettings(); showTab(stTab); show("#settings"); sfx("select"); }
 function renderSettings() {
+  renderVersions(); renderSkins();
   const a = state.audio;
   $("#stMusicVol").value = a.musicVol; $("#stSfxVol").value = a.sfxVol; $("#stTune").checked = a.tune !== false; $("#stAway").checked = a.pauseHidden !== false;
   $("#stMusicName").innerHTML = ""; const mn = document.createElement("span");

@@ -88,7 +88,13 @@ function endDrag(x, y, commit) {
     const el = document.elementFromPoint(x, y);
     const slot = el && el.closest(".page.current .slot");
     const dot = el && el.closest(".dot");
-    if (slot && slot.dataset.id !== d.id) {
+    const into = slot && slot.dataset.id && byId(slot.dataset.id);
+    if (into && into.kind === "stack" && into.id !== d.id && !["stack", "project"].includes(c.kind)) {
+      // dropping a tile on a stack puts it inside
+      checkpoint("move " + c.name + " into " + into.name);
+      c.stack = into.id; c.slot = -1; moved = true;
+      setTimeout(() => toastAction(c.name + " is now in " + into.name, "Undo", undo), 50);
+    } else if (slot && slot.dataset.id !== d.id) {
       const pid = state.pages[+slot.dataset.page].id, s2 = +slot.dataset.slot, other = chAt(pid, s2);
       if (other) { other.page = c.page; other.slot = c.slot; }
       c.page = pid; c.slot = s2; moved = true;
@@ -105,5 +111,5 @@ function endDrag(x, y, commit) {
   if (tempEmpty) state.pages = state.pages.filter(p => p.id !== d.tempPage);
   if (moved) { sfx("confirm"); save(); } else sfx("back");
   render();
-  if (moved) goPage(pageOf(c), true);
+  if (moved) goPage(pageOf(c.stack ? byId(c.stack) : c), true);
 }

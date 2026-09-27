@@ -8,12 +8,15 @@ function render() {
     for (let s = 0; s < PER; s++) {
       const c = chAt(p.id, s);
       const b = document.createElement("button");
-      b.dataset.page = pi; b.dataset.slot = s;
+      b.dataset.page = pi; b.dataset.slot = s; b.style.setProperty("--n", s);
       if (c) {
         b.className = "slot tile"; b.dataset.id = c.id; b.setAttribute("aria-label", c.name);
         const ob = document.createElement("span"); ob.className = "orbit"; b.appendChild(ob);
         const sc = document.createElement("div"); sc.className = "screen";
-        if (c.kind === "flow") { b.classList.add("flow"); fillFlowTile(sc, c); } else fillScreen(sc, c);
+        if (c.kind === "flow") { b.classList.add("flow"); fillFlowTile(sc, c); }
+        else if (c.kind === "stack") { b.classList.add("stack"); fillStackTile(sc, c); }
+        else if (c.kind === "project") { b.classList.add("project"); fillProjectTile(sc, c); }
+        else fillScreen(sc, c);
         b.appendChild(sc);
         const np = document.createElement("div"); np.className = "nameplate"; np.textContent = c.name; b.appendChild(np);
       } else {
@@ -83,7 +86,7 @@ track.addEventListener("click", e => {
   if (suppressClick) return;
   const b = e.target.closest(".slot"); if (!b) return;
   const c = b.dataset.id && state.channels.find(x => x.id === b.dataset.id);
-  if (c && !editMode) openPreview(c, b);
+  if (c && !editMode) openItem(c, b);
   else if (visiting) return;
   else if (c) openEditor(c);
   else openEditor(null, state.pages[+b.dataset.page].id, +b.dataset.slot);

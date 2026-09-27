@@ -63,11 +63,13 @@
         <div class="tags" id="pvTags"></div>
         <ol class="pv-steps" id="pvSteps"></ol>
         <div class="pv-notes" id="pvNotes"></div>
+        <div class="pv-history" id="pvHistory" hidden></div>
       </div>
       <div class="pv-actions">
         <a class="pill primary" id="pvOpen" target="_blank" rel="noopener noreferrer">Open site</a>
         <button class="pill" id="pvBack">Back to menu</button>
         <button class="pill small" id="pvEdit">Edit channel</button>
+        <button class="pill small" id="pvFav" aria-pressed="false">&#9734; Favorite</button>
       </div>
     </div>
   </div>
@@ -77,20 +79,36 @@
 <div class="overlay sheet-bg" id="editor" role="dialog" aria-modal="true" aria-labelledby="edTitle">
   <form class="sheet" id="edForm" autocomplete="off" novalidate>
     <h3 id="edTitle">Add channel</h3>
-    <div class="seg kind-seg" id="edKind"><button type="button" data-v="channel">Channel</button><button type="button" data-v="flow">Workflow</button></div>
+    <div class="seg kind-seg" id="edKind"><button type="button" data-v="channel">Channel</button><button type="button" data-v="flow">Workflow</button><button type="button" data-v="stack">Stack</button><button type="button" data-v="project">Project</button></div>
     <div class="field"><label for="edName">Name</label><input type="text" id="edName" maxlength="60"></div>
-    <div class="field only-ch"><label for="edUrl">Link</label><input type="text" id="edUrl" inputmode="url" placeholder="example.com or https://…"></div>
+    <div class="field" data-kinds="channel"><label for="edUrl">Link</label><input type="text" id="edUrl" inputmode="url" placeholder="example.com or https://…"></div>
     <div class="field">
       <label for="edDesc" id="edDescLbl">What it's for</label>
       <textarea id="edDesc" maxlength="400" placeholder="One or two lines you'll read when you open this channel"></textarea>
-      <div class="row only-ch"><button type="button" class="pill small" id="edDraft" hidden>Draft with Claude</button><span class="hint" id="edDraftHint"></span></div>
+      <div class="row" data-kinds="channel"><button type="button" class="pill small" id="edDraft" hidden>Draft with Claude</button><span class="hint" id="edDraftHint"></span></div>
     </div>
-    <div class="field only-flow"><span class="lbl">Steps</span><div id="edSteps"></div>
+    <div class="field" data-kinds="flow"><label for="edTemplate">Start from a template</label><select id="edTemplate"></select>
+      <span class="hint" id="edTemplateHint">Templates fill in steps and checklists, matched to your own channels where they can be.</span></div>
+    <div class="field" data-kinds="flow"><span class="lbl">Steps</span><div id="edSteps"></div>
       <div class="row"><button type="button" class="pill small" id="edAddStep">Add step</button></div>
-      <span class="hint">During a session the steps open in this order. A note reminds you what to do there.</span></div>
+      <span class="hint">During a session the steps open in this order. A note and a checklist remind you what to do there.</span></div>
+    <div class="row split" data-kinds="project">
+      <div class="field"><label for="edClient">Client or for</label><input type="text" id="edClient" maxlength="80" placeholder="Portcast, personal, school"></div>
+      <div class="field"><label for="edDue">Due</label><input type="date" id="edDue"></div>
+    </div>
+    <div class="row split" data-kinds="project">
+      <div class="field"><label for="edStatus">Status</label><select id="edStatus"><option value="planning">Planning</option><option value="active">In progress</option><option value="review">In review</option><option value="delivered">Delivered</option></select></div>
+      <div class="field"><label for="edFlow">Workflow</label><select id="edFlow"></select></div>
+    </div>
+    <div class="field" data-kinds="project"><label for="edPinAdd">Pinned channels</label>
+      <div class="chips" id="edPins"></div><select id="edPinAdd"></select></div>
+    <div class="field" data-kinds="project"><span class="lbl">Files and links</span><div id="edFiles"></div>
+      <div class="row"><button type="button" class="pill small" id="edAddFile">Add a link</button></div>
+      <span class="hint">Project folders, review links, the brief. Only you can see these.</span></div>
+    <div class="field" data-kinds="channel flow"><label for="edStack">Keep in a stack</label><select id="edStack"></select></div>
     <div class="field"><label for="edTags">Tags</label><input type="text" id="edTags" placeholder="free, needs login, textures"><span class="hint">Separate with commas. Tags also pick the tile's sound world.</span>
       <div class="world-line" id="edWorld"></div></div>
-    <div class="field only-ch"><label for="edNotes">Your notes</label><textarea id="edNotes" maxlength="1000" placeholder="Logins, favorite pages, when to use it"></textarea></div>
+    <div class="field" data-kinds="channel project"><label for="edNotes" id="edNotesLbl">Your notes</label><textarea id="edNotes" maxlength="1000" placeholder="Logins, favorite pages, when to use it"></textarea><span class="hint">Only you can see notes.</span></div>
     <div class="row split">
       <div class="field"><label for="edPage">Page</label><select id="edPage"></select></div>
       <div class="field"><label for="edIcon">Icon</label><input type="text" id="edIcon" maxlength="4" placeholder="Emoji or letters"></div>
@@ -109,6 +127,11 @@
       <button type="button" class="pill small" id="edImgClear" hidden>Remove image</button>
       <input type="file" id="edImgFile" accept="image/*" hidden>
     </div>
+    <div class="field" data-kinds="channel flow project" id="edBannerField"><span class="lbl">Banner</span>
+      <div class="row"><button type="button" class="pill small" id="edBannerBtn">Add a banner image or video</button>
+        <button type="button" class="pill small" id="edBannerClear" hidden>Remove banner</button>
+        <input type="file" id="edBannerFile" accept="image/*,video/mp4,video/webm" hidden></div>
+      <span class="hint" id="edBannerHint">Plays behind the tile's banner when you open it, like a Wii channel preview.</span></div>
     <p class="form-err" id="edErr" role="alert" hidden></p>
     <div class="sheet-actions">
       <button type="button" class="pill small danger" id="edDelete">Delete</button>
@@ -166,6 +189,8 @@
         </section>
 
         <section class="st-pane" role="tabpanel" data-pane="look" aria-label="Appearance">
+          <h4>Menu style</h4>
+          <div class="skins" id="stSkins" role="radiogroup" aria-label="Menu style"></div>
           <h4>Theme</h4>
           <div class="seg" id="stTheme"><button data-v="auto">Auto</button><button data-v="light">Light</button><button data-v="dark">Dark</button><button data-v="time">Time of day</button></div>
           <p class="hint">Auto follows your system. Time of day switches to dark in the evening and back to light in the morning.</p>
@@ -199,6 +224,12 @@
           <p class="hint" style="margin-top:0">Export saves your channels, workflows, notes and pages as a file. Uploaded sounds and images stay here.</p>
           <p class="sync" id="stSync"></p>
           <div class="row"><button class="pill small" id="stExport">Export channels</button><button class="pill small" id="stImport">Import channels</button><input type="file" id="stImportFile" accept="application/json,.json" hidden></div>
+          <h4>Browser bookmarks</h4>
+          <p class="hint" style="margin-top:0">Export your bookmarks from Chrome, Firefox or Safari as an HTML file, then bring in the folders you want. Each folder becomes a page.</p>
+          <div class="row"><button class="pill small" id="stBookmarks">Import bookmarks</button><input type="file" id="bmFile" accept=".html,.htm,text/html" hidden></div>
+          <h4>Earlier versions</h4>
+          <p class="hint" style="margin-top:0">A copy of your menu is kept before big changes (imports, deletes) and every so often while you edit. Only you can see them.</p>
+          <div id="stVersions"></div>
         </section>
       </div>
     </div>
@@ -254,7 +285,11 @@
   <div class="sheet keys-sheet">
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 id="kTitle" style="margin:0">Shortcuts</h3><button class="x" id="kClose" aria-label="Close shortcuts">✕</button></div>
     <div class="keys-list">
+      <div><span><kbd>Ctrl</kbd><kbd>K</kbd></span>Open a site: type a few letters, then Enter (Cmd K on a Mac)</div>
       <div><span><kbd>/</kbd></span>Search your channels</div>
+      <div><span><kbd>1</kbd>–<kbd>9</kbd></span>Open a tile on this page</div>
+      <div><span><kbd>Ctrl</kbd><kbd>Z</kbd></span>Undo the last change</div>
+      <div><span>Paste a link</span>Adds it as a tile (or drop a link from your browser)</div>
       <div><span><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd></span>Move between tiles</div>
       <div><span><kbd>Enter</kbd></span>Open the selected tile's banner</div>
       <div><span><kbd>[</kbd><kbd>]</kbd></span>Previous or next page</div>
@@ -285,7 +320,7 @@
 <div class="overlay" id="idle" aria-hidden="true">
   <div class="idle-sky"></div>
   <div id="idleFloat"></div>
-  <div class="idle-clock"><div class="idle-time" id="idleTime"></div><div class="idle-date" id="idleDate"></div></div>
+  <div class="idle-clock"><div class="idle-time" id="idleTime"></div><div class="idle-date" id="idleDate"></div><div class="idle-today" id="idleToday"></div></div>
   <p class="idle-hint">Move the mouse or press any key to come back</p>
 </div>
 
@@ -294,13 +329,16 @@
   <span class="flow-icon" id="sesIcon" style="position:static;font-size:20px"></span>
   <b class="ses-name" id="sesName"></b>
   <div class="ses-steps" id="sesSteps"></div>
+  <button class="pill small" id="sesChecks" aria-expanded="false" aria-controls="sesPanel" hidden></button>
   <a class="pill small primary" id="sesNext" target="_blank" rel="noopener noreferrer"></a>
   <span class="ses-time" id="sesTime">0:00</span>
   <button class="x" id="sesEnd" aria-label="End session" data-tip="End session">✕</button>
 </div>
+<div id="sesPanel" role="region" aria-label="Session checklist" hidden></div>
 
 <!-- @include partials/social.html -->
 <!-- @include partials/onboarding.html -->
+<!-- @include partials/workflow.html -->
 <div id="cursor" aria-hidden="true"></div>
 <div class="tip" id="tip"></div>
 <div class="toast" id="toast" role="status"></div>

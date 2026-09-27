@@ -4,7 +4,7 @@ try { const m = JSON.parse(localStorage.getItem(ME_KEY)); if (m && m.id) { me.id
 let bootKey = lsKey(), local = null;
 try { local = JSON.parse(localStorage.getItem(bootKey)); } catch {}
 state = normalize(local || blankState());
-function applyAll() { applyTheme(); applyLighting(); applyBackdrop(); render(); }
+function applyAll() { applySkin(); applyTheme(); applyLighting(); applyBackdrop(); render(); }
 applyAll(); renderSession(); renderSocialChrome(); tickFocus();
 
 function whenClaude(cb, tries = 0) {
@@ -52,8 +52,8 @@ function connectDb(d) {
   privRef = db.doc("data/users/" + me.id + "/private");
   privRef.onSnapshot(snap => {
     const d = snap.exists ? snap.data() : null;
-    privNotes = (d && d.notes) || {}; privSaved = JSON.stringify(privNotes); privLoaded = true;
-    applyPrivateNotes(visiting ? homeState : state);
+    privData = { notes: (d && d.notes) || {}, fields: (d && d.fields) || {} }; privSaved = JSON.stringify(privData); privLoaded = true;
+    applyPrivate(visiting ? homeState : state);
     migrateNotes();
   }, () => {});
   ref = db.doc(me.isOwner ? "menu/main" : "spaces/" + me.id);
@@ -66,12 +66,14 @@ function connectDb(d) {
     }
     const data = JSON.parse(JSON.stringify(snap.data()));
     const mine = visiting ? homeState : state;
-    if (gotRemote && (data.rev || 0) === mine.rev && JSON.stringify(data.channels.map(c => ({ ...c, notes: undefined }))) === JSON.stringify(mine.channels.map(c => ({ ...c, notes: undefined })))) return;
+    const pub = list => JSON.stringify(list.map(c => { const o = { ...c }; PRIVATE_KEYS.forEach(k => { delete o[k]; }); return o; }));
+    if (gotRemote && (data.rev || 0) === mine.rev && pub(data.channels) === pub(mine.channels)) return;
     gotRemote = true;
-    legacyNotes = data.channels.some(c => c.notes);
+    legacyNotes = data.channels.some(c => PRIVATE_KEYS.some(k => c[k] != null));
     const incoming = normalize(data);
-    incoming.channels.forEach(c => { const old = mine.channels.find(x => x.id === c.id); if (!c.notes && old && old.notes) c.notes = old.notes; });
-    applyPrivateNotes(incoming);
+    // keep this device's private values until the private doc says otherwise
+    incoming.channels.forEach(c => { const old = mine.channels.find(x => x.id === c.id); if (old) PRIVATE_KEYS.forEach(k => { if (c[k] == null && old[k] != null) c[k] = old[k]; }); });
+    applyPrivate(incoming);
     try { localStorage.setItem(lsKey(), JSON.stringify(incoming)); } catch {}
     if (visiting) { homeState = incoming; migrateNotes(); return; }
     const hadMusic = state.audio.music;
@@ -94,5 +96,5 @@ function migrateNotes() {
 if (TEST) window.__sm = {
   get state() { return state; }, get home() { return homeState; }, get visiting() { return visiting; },
   get me() { return me; }, get people() { return people; }, get peers() { return peersNow; },
-  get plaza() { return plaza; }, get onb() { return onb; }, normalize, AVATAR, encodeAvatar, decodeAvatar,
+  get plaza() { return plaza; }, get onb() { return onb; }, get undoStack() { return undoStack; }, readLog, TEMPLATES, normalize, AVATAR, encodeAvatar, decodeAvatar,
 };

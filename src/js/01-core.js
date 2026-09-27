@@ -11,7 +11,7 @@ let saveTimer = null, saving = false, gotRemote = false;
 /* ---------- identity + social state (see docs/ARCHITECTURE.md) ---------- */
 const TEST = /[?&]test\b/.test(location.search);   // local test host only; never true on claude.ai
 const ME_KEY = "studio-menu-me";
-let user = null, room = null, privRef = null, privNotes = {}, privLoaded = false;
+let user = null, room = null, privRef = null, privData = { notes: {}, fields: {} }, privLoaded = false;
 // me.canWrite: true/false once the platform says, null when it said nothing
 const me = { id: null, isOwner: false, canWrite: null, name: "" };
 let hubOwner = null;                        // the artifact owner's id; their space lives at menu/main

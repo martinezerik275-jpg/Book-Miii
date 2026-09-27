@@ -21,11 +21,14 @@ Status: `done`, `preview` (on the preview artifact, not live), `next`, `later`.
 | Private channel notes, in-page confirm (delete/import now work), safe links | done | Live as version 12 |
 | Spaces, neighbors, plaza, Avatar Clinic, stamps, status, photo booth | done | Live as version 12 |
 | Onboarding: welcome, tours, check-in card, Dr. Paws | preview | Needs a live multi-user check before release |
+| Phase 1: quick add, bookmark import, favorites/recents, launcher, undo, version history, stacks | preview | Favorites and Recent are sections at the top of search and the launcher, not a separate page |
+| Phase 3: session log, step checklists, workflow templates, projects, moodboard | preview | |
+| Phase 4: channel banners, controller, menu skins, boot and idle polish, phone pass | preview | Banners need uploads (owner and editors) |
 | Multi-user test on claude.ai | later | See Phase 4 |
 
 ---
 
-## Phase 1: The launcher is fast and hard to lose (next)
+## Phase 1: The launcher is fast and hard to lose (preview)
 
 What someone does dozens of times a day: find a tool, open it, add a new one.
 
@@ -38,7 +41,7 @@ What someone does dozens of times a day: find a tool, open it, add a new one.
 | **Undo and history** | M | Undo the last change (delete, move, import) and keep the last 20 menu versions in a private doc with "restore this version". | Makes bold edits safe. The shared menu is the only copy of years of curation. |
 | **Stacks (folders)** | M | A tile that holds more tiles (like a Wii channel group). Opens as a small grid on top of the menu. | 12 slots a page fills fast. Stacks keep related tools together (every texture site in one tile). |
 
-## Phase 2: Channels that know creative work (next)
+## Phase 2: Channels that know creative work (next up)
 
 Make each tile carry the details a creative actually needs when they open it.
 
@@ -50,7 +53,7 @@ Make each tile carry the details a creative actually needs when they open it.
 | **Tag views** | S | Click a tag to see every tile with it across pages, as a temporary page. Sound worlds already use tags; this makes them navigable. | Find "all LUT sites" without remembering which page they're on. |
 | **Claude, organize my menu** | M | Uses the existing "Draft with Claude" capability: suggest pages, tags and duplicates for the whole menu, shown as a preview you accept item by item. | A one-off tidy-up that would otherwise take an afternoon. |
 
-## Phase 3: Workflows become projects (next, after 1 and 2)
+## Phase 3: Workflows become projects (preview)
 
 Workflows exist (up to 8 steps, a session dock, a timer) but nothing is kept once a session ends.
 Your other artifacts (reel trackers, editing session prep, work log) show projects are the real unit
@@ -64,7 +67,7 @@ of work.
 | **Projects** | L | A project tile: name, client, due date, status, its workflow, pinned channels, links to files (Drive, Frame.io), and notes. The session log rolls up per project. | The launcher becomes the start of every job, not only a list of sites. |
 | **Moodboard shelf** | M | Drop reference images onto a project; they live in the project (assets for editors, small images otherwise). | Reference stays next to the tools it's for. |
 
-## Phase 4: The Wii finish (later)
+## Phase 4: The Wii finish (preview)
 
 | Item | Size | What it is |
 |---|---|---|
@@ -102,3 +105,6 @@ Everything here builds on what's already live. Social comes after Phases 1 to 3.
 - 5,000 database documents per artifact; 256 KiB per document. Session logs and version history
   must be grouped (for example one document per month) rather than one per entry.
 - `window.confirm`, `alert` and download links are blocked; use `askConfirm()` and `downloads`.
+- Private per-person data (notes, open counts, project client/dates/files/moodboard, onboarding,
+  version history, the session log) lives under `data/users/<id>/`. Everything else in a space is
+  readable by anyone who can open the menu.

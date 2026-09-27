@@ -6,6 +6,7 @@ $("#start").addEventListener("click", () => {
   setTimeout(() => { sfx("open"); startMusic(); loadAllSfx(); }, 60);
   lastActivity = Date.now();
   setTimeout(maybeOnboard, 450);
+  if (!reduceMotion) { document.body.classList.add("booting"); setTimeout(() => document.body.classList.remove("booting"), 1400); }
   const first = track.children[page]?.querySelector(".slot");
   if (first && !matchMedia("(pointer: fine)").matches) {} // leave focus alone on touch
 });

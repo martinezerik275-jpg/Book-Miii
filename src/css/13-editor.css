@@ -1,7 +1,5 @@
 /* editor: kinds, steps, sound world line */
 .kind-seg{margin:-4px 0 18px}
-#edForm[data-kind="flow"] .only-ch{display:none}
-#edForm[data-kind="channel"] .only-flow{display:none}
 .step-row{display:grid;grid-template-columns:28px 1fr 1fr auto auto;gap:8px;align-items:center;margin-bottom:8px}
 .step-row .step-n{width:26px;height:26px;border-radius:50%;background:var(--sel);color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center}
 .step-row select,.step-row input{font-size:15px;padding:9px 12px;border-radius:12px;border:none;background:var(--field);box-shadow:inset 0 0 0 2px var(--line);min-width:0;width:100%}

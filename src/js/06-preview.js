@@ -41,6 +41,7 @@ function openPreview(c, tile) {
   (c.tags || []).forEach(t => { const s = document.createElement("span"); s.className = "tag"; s.textContent = t; tg.appendChild(s); });
   $("#pvNotes").textContent = isFlow ? "" : (c.notes || "");
   if (!isFlow) $("#pvOpen").href = c.url;
+  paintFav(c); renderFlowHistory(c); paintBannerMedia($("#pvScreen"), c);
   if (visiting) {
     $("#pvEdit").textContent = "Add to my space";
     $("#pvEdit").hidden = !me.id || me.canWrite === false;
@@ -67,7 +68,7 @@ $("#pvOpen").onclick = e => {
   if (c && c.kind === "flow") {
     if (!flowSteps(c).length) { e.preventDefault(); sfx("error"); toast("Add steps to this workflow first."); return; }
     hide("#preview"); duckMusic(false); startSession(c);
-  } else { sfx("launch", 0, tileWorld(c)); workingIn(c); }
+  } else { sfx("launch", 0, tileWorld(c)); workingIn(c); noteOpen(c); }
 };
 $("#pvSteps").addEventListener("pointerover", e => { const a = e.target.closest("a"); if (a && !a.contains(e.relatedTarget)) sfx("tick"); });
 $("#pvEdit").onclick = () => {

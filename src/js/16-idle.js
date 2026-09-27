@@ -32,6 +32,7 @@ function enterIdle() {
     else fillScreen(sc, c);
     t.appendChild(sc); box.appendChild(t);
   });
+  paintIdleToday();
   tick(); show("#idle"); $("#idle").setAttribute("aria-hidden", "false"); tip.classList.remove("show"); document.body.classList.add("idling");
   sfx("idleIn");
 }

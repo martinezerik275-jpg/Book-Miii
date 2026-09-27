@@ -1,7 +1,11 @@
 /* ================= overlays + keys ================= */
-const MODALS = ["#editor", "#settings", "#search", "#keys", "#logos", "#bdSheet", "#plaza", "#clinic", "#people", "#stampSheet", "#photoSheet", "#confirm", "#welcome", "#tour"];
+const MODALS = ["#editor", "#settings", "#search", "#keys", "#logos", "#bdSheet", "#plaza", "#clinic", "#people", "#stampSheet", "#photoSheet", "#confirm", "#welcome", "#tour", "#bmSheet", "#stackSheet", "#sesDoneSheet", "#projSheet"];
 function show(s) { $(s).classList.add("open"); syncModal(); }
-function hide(s) { $(s).classList.remove("open"); syncModal(); }
+function hide(s) {
+  const el = $(s); el.classList.remove("open"); syncModal();
+  // don't leave focus inside something hidden, or the next key press goes nowhere
+  if (el.contains(document.activeElement)) document.activeElement.blur();
+}
 function syncModal() { document.body.classList.toggle("modal-open", MODALS.some(m => $(m).classList.contains("open"))); }
 const anyOverlay = () => ["#start", "#preview", "#idle", ...MODALS].some(m => $(m).classList.contains("open"));
 document.addEventListener("keydown", e => {
@@ -19,6 +23,11 @@ document.addEventListener("keydown", e => {
       else closePlaza();
     }
     else if ($("#editor").classList.contains("open")) { hide("#editor"); sfx("back"); }
+    else if ($("#sesDoneSheet").classList.contains("open")) closeSesDone(false);
+    else if ($("#bmSheet").classList.contains("open")) { hide("#bmSheet"); sfx("back"); }
+    else if ($("#preview").classList.contains("open") && $("#stackSheet").classList.contains("open")) closePreview();
+    else if ($("#stackSheet").classList.contains("open")) closeStack();
+    else if ($("#projSheet").classList.contains("open")) closeProject();
     else if ($("#settings").classList.contains("open")) { hide("#settings"); sfx("back"); }
     else if ($("#search").classList.contains("open")) { hide("#search"); sfx("back"); }
     else if ($("#keys").classList.contains("open")) { hide("#keys"); sfx("back"); }
@@ -31,7 +40,13 @@ document.addEventListener("keydown", e => {
   }
   if (anyOverlay()) return;
   if (e.target.matches("input,textarea,select")) return;
-  if (e.key === "/") { e.preventDefault(); openSearch(); return; }
+  if (e.key === "/") { e.preventDefault(); openSearch("find"); return; }
+  // 1-9 open the tiles on this page, in reading order
+  if (/^[1-9]$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    const b = track.children[page] && track.children[page].querySelectorAll(".slot")[+e.key - 1];
+    if (b && b.dataset.id) { e.preventDefault(); b.focus({ preventScroll: true }); b.click(); }
+    return;
+  }
   if (e.key === "?") { e.preventDefault(); openKeys(); return; }
   if ((e.key === "p" || e.key === "P") && !e.metaKey && !e.ctrlKey && room) { e.preventDefault(); openPlaza(); return; }
   if (e.key === "PageDown" || e.key === "]") { goPage(page + 1); return; }

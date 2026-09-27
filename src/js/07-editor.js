@@ -1,22 +1,31 @@
 /* ================= editor ================= */
 let edTarget = null, edPid = null, edSlot = 0, edAsset = null, edData = null, edKind = "channel", edSteps = [], edStyle = "color", edBg = null;
+let edBanner = null, edPins = [], edFiles = [];
+const KIND_WORD = { channel: "channel", flow: "workflow", stack: "stack", project: "project" };
 function setEdKind(k) {
   edKind = k; $("#edForm").dataset.kind = k;
   [...$("#edKind").children].forEach(b => b.classList.toggle("on", b.dataset.v === k));
-  const isNew = !edTarget;
-  $("#edTitle").textContent = (isNew ? "Add " : "Edit ") + (k === "flow" ? "workflow" : "channel");
-  $("#edSave").textContent = k === "flow" ? "Save workflow" : "Save channel";
-  $("#edDescLbl").textContent = k === "flow" ? "What this session is for" : "What it's for";
-  if (k === "flow" && !edSteps.length) edSteps = [{ ch: "", note: "" }, { ch: "", note: "" }];
+  document.querySelectorAll("#edForm [data-kinds]").forEach(el => { el.hidden = !el.dataset.kinds.split(" ").includes(k); });
+  const isNew = !edTarget, word = KIND_WORD[k];
+  $("#edTitle").textContent = (isNew ? "Add " : "Edit ") + word;
+  $("#edSave").textContent = "Save " + word;
+  $("#edDescLbl").textContent = { flow: "What this session is for", stack: "What's in it", project: "The brief, in a line or two" }[k] || "What it's for";
+  $("#edNotesLbl").textContent = k === "project" ? "Project notes" : "Your notes";
+  if (k === "flow" && !edSteps.length) edSteps = [{ ch: "", note: "", checks: [] }, { ch: "", note: "", checks: [] }];
+  if (k === "flow") renderTemplates();
+  if (k === "project") renderProjectFields();
+  renderStackSelect(); renderBannerRow();
   renderEdSteps(); updateWorldLine();
 }
 $("#edKind").onclick = e => { const b = e.target.closest("button"); if (b) { setEdKind(b.dataset.v); sfx("tick"); } };
-function channelOptions(sel, value) {
-  sel.innerHTML = '<option value="">Choose a site…</option>';
-  state.pages.forEach(p => {
-    const chs = state.channels.filter(c => c.page === p.id && c.kind !== "flow").sort((a, b) => a.slot - b.slot);
+// every site on the menu, grouped by page (stacked ones listed under their stack)
+function channelOptions(sel, value, placeholder = "Choose a site…", filter = c => !c.kind) {
+  sel.innerHTML = ""; const o0 = document.createElement("option"); o0.value = ""; o0.textContent = placeholder; sel.appendChild(o0);
+  const groups = state.pages.map(p => [p.name, state.channels.filter(c => !c.stack && c.page === p.id && filter(c)).sort((a, b) => a.slot - b.slot)]);
+  state.channels.filter(c => c.kind === "stack").forEach(st => groups.push([st.name, state.channels.filter(c => c.stack === st.id && filter(c))]));
+  groups.forEach(([label, chs]) => {
     if (!chs.length) return;
-    const g = document.createElement("optgroup"); g.label = p.name;
+    const g = document.createElement("optgroup"); g.label = label;
     chs.forEach(c => { const o = document.createElement("option"); o.value = c.id; o.textContent = c.name; g.appendChild(o); });
     sel.appendChild(g);
   });
@@ -25,9 +34,10 @@ function channelOptions(sel, value) {
 function renderEdSteps() {
   const box = $("#edSteps"); box.innerHTML = "";
   edSteps.forEach((st, i) => {
+    const wrap = document.createElement("div"); wrap.className = "step-wrap";
     const r = document.createElement("div"); r.className = "step-row";
     const n = document.createElement("span"); n.className = "step-n"; n.textContent = i + 1;
-    const sel = document.createElement("select"); sel.setAttribute("aria-label", "Site for step " + (i + 1)); channelOptions(sel, st.ch);
+    const sel = document.createElement("select"); sel.setAttribute("aria-label", "Site for step " + (i + 1)); channelOptions(sel, st.ch, st.hint ? "Choose a site for " + st.hint + "…" : "Choose a site…");
     sel.onchange = () => { st.ch = sel.value; updateWorldLine(); };
     const inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "Note (optional)"; inp.maxLength = 80; inp.value = st.note || "";
     inp.setAttribute("aria-label", "Note for step " + (i + 1)); inp.oninput = () => { st.note = inp.value; };
@@ -35,10 +45,25 @@ function renderEdSteps() {
     up.onclick = () => { edSteps.splice(i - 1, 0, edSteps.splice(i, 1)[0]); renderEdSteps(); sfx("tick"); };
     const del = document.createElement("button"); del.type = "button"; del.className = "x"; del.textContent = "✕"; del.setAttribute("aria-label", "Remove step");
     del.onclick = () => { edSteps.splice(i, 1); renderEdSteps(); sfx("back"); };
-    r.append(n, sel, inp, up, del); box.appendChild(r);
+    r.append(n, sel, inp, up, del);
+    const cl = document.createElement("details"); cl.className = "step-checks"; if ((st.checks || []).length) cl.open = false;
+    const sm = document.createElement("summary"); sm.textContent = "Checklist" + ((st.checks || []).length ? " (" + st.checks.length + ")" : "");
+    const ta = document.createElement("textarea"); ta.rows = 3; ta.placeholder = "One item per line, like: Export ProRes 422 HQ";
+    ta.setAttribute("aria-label", "Checklist for step " + (i + 1)); ta.value = (st.checks || []).join("\n");
+    ta.oninput = () => { st.checks = ta.value.split("\n").map(x => x.trim()).filter(Boolean).slice(0, 8); sm.textContent = "Checklist" + (st.checks.length ? " (" + st.checks.length + ")" : ""); };
+    cl.append(sm, ta);
+    wrap.append(r, cl); box.appendChild(wrap);
   });
 }
-$("#edAddStep").onclick = () => { if (edSteps.length >= 8) { toast("A workflow can have up to 8 steps."); return; } edSteps.push({ ch: "", note: "" }); renderEdSteps(); sfx("select"); };
+$("#edAddStep").onclick = () => { if (edSteps.length >= 8) { toast("A workflow can have up to 8 steps."); return; } edSteps.push({ ch: "", note: "", checks: [] }); renderEdSteps(); sfx("select"); };
+// channels and workflows can live in a stack
+function renderStackSelect() {
+  const sel = $("#edStack"), stacks = state.channels.filter(c => c.kind === "stack");
+  sel.innerHTML = '<option value="">Not in a stack</option>';
+  stacks.forEach(st => { const o = document.createElement("option"); o.value = st.id; o.textContent = st.name; sel.appendChild(o); });
+  sel.value = (edTarget && edTarget.stack) || "";
+  sel.closest(".field").hidden = !["channel", "flow"].includes(edKind) || !stacks.length;
+}
 function edTagList() { return $("#edTags").value.split(",").map(t => t.trim()).filter(Boolean); }
 function updateWorldLine() {
   const line = $("#edWorld"); line.innerHTML = "";
@@ -63,7 +88,6 @@ function openEditor(c, pid, slot) {
   edTarget = c; edAsset = c ? c.iconAsset || null : null; edData = c ? c.iconData || null : null;
   edStyle = c && c.iconStyle || "color"; edBg = c && c.iconBg || null;
   $("#edErr").hidden = true; document.querySelectorAll("#edForm .field.bad").forEach(f => f.classList.remove("bad"));
-  $("#edTitle").textContent = c ? "Edit channel" : "Add channel";
   $("#edName").value = c ? c.name : ""; $("#edUrl").value = c ? c.url : "";
   $("#edDesc").value = c ? c.desc || "" : ""; $("#edTags").value = c ? (c.tags || []).join(", ") : "";
   $("#edNotes").value = c ? c.notes || "" : ""; $("#edIcon").value = c ? c.icon || "" : "";
@@ -75,9 +99,12 @@ function openEditor(c, pid, slot) {
   $("#edDelete").hidden = !c;
   $("#edDraft").hidden = !sample; $("#edDraftHint").textContent = "";
   $("#edImgClear").hidden = !(edAsset || edData);
-  edSteps = c && c.kind === "flow" ? (c.steps || []).map(x => ({ ch: x.ch, note: x.note || "" })) : [];
+  edSteps = c && c.kind === "flow" ? (c.steps || []).map(x => ({ ch: x.ch, note: x.note || "", checks: (x.checks || []).slice() })) : [];
+  edBanner = c && c.banner ? Object.assign({}, c.banner) : null;
+  edPins = c && c.kind === "project" ? c.pins.slice() : []; edFiles = c && c.kind === "project" ? c.files.map(f => ({ ...f })) : [];
+  $("#edClient").value = c && c.client || ""; $("#edDue").value = c && c.due || ""; $("#edStatus").value = c && c.status || "active";
   $("#edKind").hidden = !!c;
-  setEdKind(c && c.kind === "flow" ? "flow" : "channel");
+  setEdKind(c ? (c.kind || "channel") : "channel");
   updateMini(); show("#editor"); sfx("select");
   setTimeout(() => $("#edName").focus(), 30);
 }
@@ -101,55 +128,59 @@ function formError(msg, field) {
 $("#edForm").onsubmit = e => {
   e.preventDefault();
   $("#edErr").hidden = true; document.querySelectorAll("#edForm .field.bad").forEach(f => f.classList.remove("bad"));
-  if (!$("#edName").value.trim()) return formError(edKind === "flow" ? "Give the workflow a name." : "Give the channel a name.", $("#edName"));
-  if (edKind === "flow") return saveFlow();
-  let url = $("#edUrl").value.trim(); if (url && !/^https?:\/\//i.test(url)) url = "https://" + url;
-  let okUrl = false; try { const u = new URL(url); okUrl = /\./.test(u.hostname) || u.hostname === "localhost"; } catch {}
-  if (!okUrl) return formError("Add a link, like texturelabs.org or https://texturelabs.org.", $("#edUrl"));
+  const word = KIND_WORD[edKind];
+  if (!$("#edName").value.trim()) return formError("Give the " + word + " a name.", $("#edName"));
   const data = {
-    name: $("#edName").value.trim(), url, desc: $("#edDesc").value.trim(),
-    tags: $("#edTags").value.split(",").map(t => t.trim()).filter(Boolean).slice(0, 8),
-    notes: $("#edNotes").value.trim(), icon: $("#edIcon").value.trim(), hue: +$("#edHue").value, iconAsset: edAsset, iconData: edData, iconStyle: edStyle, iconBg: edBg
+    name: $("#edName").value.trim(), desc: $("#edDesc").value.trim(), tags: edTagList().slice(0, 8),
+    icon: $("#edIcon").value.trim(), hue: +$("#edHue").value, iconAsset: edAsset, iconData: edData, iconStyle: edStyle, iconBg: edBg,
+    banner: edBanner || undefined,
   };
-  const newPid = $("#edPage").value;
-  if (edTarget) {
-    Object.assign(edTarget, data);
-    if (newPid !== edTarget.page) { edTarget.page = newPid; edTarget.slot = firstFree(newPid); }
+  if (edKind === "channel") {
+    let url = $("#edUrl").value.trim(); if (url && !/^https?:\/\//i.test(url)) url = "https://" + url;
+    let okUrl = false; try { const u = new URL(url); okUrl = /\./.test(u.hostname) || u.hostname === "localhost"; } catch {}
+    if (!okUrl) return formError("Add a link, like texturelabs.org or https://texturelabs.org.", $("#edUrl"));
+    Object.assign(data, { url, notes: $("#edNotes").value.trim() });
+  } else if (edKind === "flow") {
+    const steps = edSteps.filter(st => st.ch).map(st => ({ ch: st.ch, note: (st.note || "").trim(), checks: (st.checks || []).slice(0, 8) }));
+    if (steps.length < 2) return formError("Pick at least two sites for the steps.", null);
+    Object.assign(data, { kind: "flow", url: "", notes: "", steps });
+  } else if (edKind === "stack") {
+    Object.assign(data, { kind: "stack", url: "", notes: "" });
   } else {
-    const pid = newPid; let slot = (pid === edPid && !chAt(pid, edSlot)) ? edSlot : firstFree(pid);
-    state.channels.push(Object.assign({ id: uid(), page: pid, slot }, data));
+    Object.assign(data, { kind: "project", url: "", notes: $("#edNotes").value.trim(), client: $("#edClient").value.trim(), due: $("#edDue").value,
+      status: $("#edStatus").value, flow: $("#edFlow").value, pins: edPins.slice(0, 12),
+      files: edFiles.map(f => ({ t: (f.t || "").trim(), u: /^https?:\/\//i.test(f.u) ? f.u.trim() : (f.u ? "https://" + f.u.trim() : "") })).filter(f => f.u) });
   }
-  state = normalize(state); save(); hide("#editor"); sfx("confirm"); render();
-  const c = edTarget || state.channels[state.channels.length - 1]; goPage(pageOf(c), true);
-  toast(edTarget ? "Channel saved" : "Channel added");
-};
-function saveFlow() {
-  const steps = edSteps.filter(s => s.ch).map(s => ({ ch: s.ch, note: (s.note || "").trim() }));
-  if (steps.length < 2) { formError("Pick at least two sites for the steps.", null); return; }
-  const data = {
-    kind: "flow", name: $("#edName").value.trim(), url: "", desc: $("#edDesc").value.trim(),
-    tags: edTagList().slice(0, 8), notes: "", icon: $("#edIcon").value.trim(), hue: +$("#edHue").value,
-    iconAsset: edAsset, iconData: edData, iconStyle: edStyle, iconBg: edBg, steps
-  };
+  const stackId = ["channel", "flow"].includes(edKind) ? $("#edStack").value : "";
   const newPid = $("#edPage").value;
-  if (edTarget) {
-    Object.assign(edTarget, data);
-    if (newPid !== edTarget.page) { edTarget.page = newPid; edTarget.slot = firstFree(newPid); }
+  if (edTarget) checkpoint("edit " + edTarget.name);
+  let c = edTarget;
+  if (c) {
+    const wasStacked = !!c.stack;
+    Object.assign(c, data); if (!data.banner) delete c.banner;
+    if (stackId) c.stack = stackId;
+    else { delete c.stack; if (wasStacked || newPid !== c.page) { c.page = newPid; c.slot = firstFree(newPid); } }
   } else {
     const slot = (newPid === edPid && !chAt(newPid, edSlot)) ? edSlot : firstFree(newPid);
-    state.channels.push(Object.assign({ id: uid(), page: newPid, slot }, data));
+    c = Object.assign({ id: uid(), page: newPid, slot }, data);
+    if (stackId) c.stack = stackId;
+    state.channels.push(c);
   }
   state = normalize(state); save(); hide("#editor"); sfx("confirm"); render();
-  const c = edTarget || state.channels[state.channels.length - 1]; goPage(pageOf(c), true);
-  toast(edTarget ? "Workflow saved" : "Workflow added");
-}
+  const shown = c.stack ? byId(c.stack) : c; if (shown) goPage(pageOf(shown), true);
+  toast((edTarget ? word.charAt(0).toUpperCase() + word.slice(1) + " saved" : word.charAt(0).toUpperCase() + word.slice(1) + " added") + (c.stack && !edTarget ? " to " + byId(c.stack).name : ""));
+};
 function firstFree(pid) { for (let i = 0; i < PER; i++) if (!chAt(pid, i)) return i; return -1; }
 $("#edDelete").onclick = async () => {
   if (!edTarget) return;
   const target = edTarget;
-  if (!await askConfirm(`Delete "${target.name}" from your menu?`, "Delete")) return;
+  const inside = target.kind === "stack" ? state.channels.filter(c => c.stack === target.id) : [];
+  if (!await askConfirm(`Delete "${target.name}" from your menu?` + (inside.length ? ` Its ${inside.length} tiles go back onto the page.` : ""), "Delete")) return;
+  checkpoint("delete " + target.name);
+  inside.forEach(c => { delete c.stack; c.page = target.page; c.slot = -1; });
   state.channels = state.channels.filter(c => c !== target);
-  save(); hide("#editor"); sfx("back"); render(); toast("Channel deleted");
+  state = normalize(state); save(); hide("#editor"); sfx("back"); render();
+  toastAction(KIND_WORD[target.kind || "channel"].replace(/^./, m => m.toUpperCase()) + " deleted", "Undo", undo);
 };
 $("#edDraft").onclick = async () => {
   const name = $("#edName").value.trim(), url = $("#edUrl").value.trim();

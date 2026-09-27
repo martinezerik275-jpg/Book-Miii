@@ -7,7 +7,7 @@ test.afterEach(closeAll);
 test("owner sees their menu, and notes move to the private doc", async ({ browser, request }) => {
   const page = await openAs(browser, OWNER);
   await expect(tiles(page)).toHaveCount(3);
-  await expect.poll(async () => (await docs(request))["data/users/u_owner/private"]).toEqual({ notes: { c1: "login: erik" } });
+  await expect.poll(async () => (await docs(request))["data/users/u_owner/private"]).toEqual({ notes: { c1: "login: erik" }, fields: {} });
   await expect.poll(async () => (await docs(request))["menu/main"].channels[0].notes).toBeUndefined();
   await expect.poll(async () => (await docs(request))["hub/info"]).toEqual({ ownerId: "u_owner" });
   // the note is still there for the owner

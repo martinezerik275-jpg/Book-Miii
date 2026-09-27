@@ -1,18 +1,18 @@
 /* ================= workflow sessions ================= */
 const SES_KEY = "studio-menu-session";
 let session = null, sesTimer = null;
-function startSession(f) {
-  session = { flowId: f.id, done: [0], start: Date.now() };
+function startSession(f, projectId) {
+  session = { flowId: f.id, done: [0], start: Date.now(), project: projectId || "", checked: {} };
   persistSession(); renderSession(); sfx("ignite", 0, tileWorld(f));
   toast("Session started: " + f.name);
 }
 function persistSession() { try { if (session) localStorage.setItem(SES_KEY, JSON.stringify(session)); else localStorage.removeItem(SES_KEY); } catch {} }
 function endSession(done) {
   if (!session) return;
-  const f = byId(session.flowId), mins = Math.round((Date.now() - session.start) / 60000);
-  if (done) { sfx("complete", 0, tileWorld(f)); toast(`Session complete${mins ? " in " + mins + (mins === 1 ? " minute" : " minutes") : ""}. Nice work.`); }
+  const f = byId(session.flowId);
+  if (done && f) { sfx("complete", 0, tileWorld(f)); finishSession(session, f); }
   else sfx("back");
-  session = null; persistSession(); renderSession();
+  session = null; persistSession(); renderSession(); renderSesPanel();
 }
 function renderSession() {
   const dock = $("#session"), f = session && byId(session.flowId);
@@ -37,12 +37,17 @@ function renderSession() {
   } else {
     nx.removeAttribute("href"); nx.removeAttribute("target"); nx.textContent = "Finish session"; nx.dataset.idx = "done";
   }
+  const total = steps.reduce((a, st) => a + (st.checks || []).length, 0), ticked = Object.keys(session.checked || {}).length;
+  $("#sesChecks").hidden = !total;
+  $("#sesChecks").textContent = "Checklist " + ticked + "/" + total;
+  renderSesPanel();
   updateSesTime();
   if (!sesTimer) sesTimer = setInterval(updateSesTime, 1000);
 }
 function markStep(i) {
   if (!session) return;
   if (!session.done.includes(i)) session.done.push(i);
+  const st = flowSteps(byId(session.flowId) || {})[i]; if (st) noteOpen(st.ch);
   persistSession(); sfx("step", i, tileWorld(byId(session.flowId)));
   setTimeout(renderSession, 0);
 }
