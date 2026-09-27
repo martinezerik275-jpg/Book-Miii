@@ -32,6 +32,7 @@ function render() {
   document.body.classList.toggle("editing", editMode);
   $("#editBtn").classList.toggle("on", editMode);
   goPage(page, true);
+  renderCheckin();
 }
 function goPage(i, silent) {
   const n = state.pages.length;

@@ -1,5 +1,5 @@
 /* ================= overlays + keys ================= */
-const MODALS = ["#editor", "#settings", "#search", "#keys", "#logos", "#bdSheet", "#plaza", "#clinic", "#people", "#stampSheet", "#photoSheet", "#confirm"];
+const MODALS = ["#editor", "#settings", "#search", "#keys", "#logos", "#bdSheet", "#plaza", "#clinic", "#people", "#stampSheet", "#photoSheet", "#confirm", "#welcome", "#tour"];
 function show(s) { $(s).classList.add("open"); syncModal(); }
 function hide(s) { $(s).classList.remove("open"); syncModal(); }
 function syncModal() { document.body.classList.toggle("modal-open", MODALS.some(m => $(m).classList.contains("open"))); }
@@ -7,9 +7,11 @@ const anyOverlay = () => ["#start", "#preview", "#idle", ...MODALS].some(m => $(
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") {
     if ($("#confirm").classList.contains("open")) closeConfirm(false);
+    else if ($("#tour").classList.contains("open")) endTour(false);
+    else if ($("#clinic").classList.contains("open")) closeClinic();
+    else if ($("#welcome").classList.contains("open")) { closeWelcome(); sfx("back"); }
     else if ($("#photoSheet").classList.contains("open")) { hide("#photoSheet"); sfx("back"); }
     else if ($("#stampSheet").classList.contains("open")) { hide("#stampSheet"); sfx("back"); }
-    else if ($("#clinic").classList.contains("open")) closeClinic();
     else if ($("#people").classList.contains("open")) { hide("#people"); sfx("back"); }
     else if ($("#plaza").classList.contains("open")) {
       if (document.activeElement === $("#pzSay")) $("#pzCanvas").focus();

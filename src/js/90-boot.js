@@ -32,6 +32,8 @@ whenClaude(async () => {
   }
   if (d) connectDb(d);
   if (r) connectRoom(r);
+  identityReady = true;
+  loadOnboarding();
   renderSocialChrome();
 });
 
@@ -92,5 +94,5 @@ function migrateNotes() {
 if (TEST) window.__sm = {
   get state() { return state; }, get home() { return homeState; }, get visiting() { return visiting; },
   get me() { return me; }, get people() { return people; }, get peers() { return peersNow; },
-  get plaza() { return plaza; }, normalize, AVATAR, encodeAvatar, decodeAvatar,
+  get plaza() { return plaza; }, get onb() { return onb; }, normalize, AVATAR, encodeAvatar, decodeAvatar,
 };

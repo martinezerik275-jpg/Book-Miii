@@ -97,6 +97,7 @@ function renderSocialChrome() {
   $("#ppStampCount").textContent = stampsIn.length ? stampsIn.length : "";
   renderVisitBar();
   if (!state) return;
+  renderCheckin();
   $("#emptyPeople").hidden = !!visiting || !db;
 }
 

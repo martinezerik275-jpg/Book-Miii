@@ -1,0 +1,87 @@
+<!-- welcome: a short check-in for first-time visitors -->
+<div class="overlay sheet-bg" id="welcome" role="dialog" aria-modal="true" aria-labelledby="wcTitle">
+  <div class="sheet wc-sheet">
+    <div class="wc-head">
+      <span class="paws" aria-hidden="true"></span>
+      <div class="wc-bubble">
+        <h3 id="wcTitle"></h3>
+        <p id="wcLead"></p>
+      </div>
+    </div>
+    <div class="wc-body">
+      <!-- newcomer -->
+      <section class="wc-step" data-step="look">
+        <div class="wc-look">
+          <span class="av-chip wc-chip" id="wcChip" aria-hidden="true"></span>
+          <div><b id="wcLookName"></b><span class="hint" id="wcLookHint"></span></div>
+        </div>
+        <div class="row"><button type="button" class="pill small primary" id="wcClinic">Open the Avatar Clinic</button></div>
+      </section>
+      <section class="wc-step" data-step="space">
+        <div class="field"><label for="wcName">Name your space</label><input type="text" id="wcName" maxlength="40"></div>
+        <div class="field"><label for="wcBlurb">A line about you (optional)</label><input type="text" id="wcBlurb" maxlength="160" placeholder="Motion designer, collects texture sites"></div>
+        <label class="check"><input type="checkbox" id="wcListed" checked> Give my space a house in the plaza so people can visit</label>
+        <p class="hint">Visitors see your channels, never your notes.</p>
+      </section>
+      <section class="wc-step" data-step="channels">
+        <p class="hint wc-pick-hint" id="wcPickHint"></p>
+        <div class="wc-picks" id="wcPicks"></div>
+        <form class="wc-add" id="wcAdd" autocomplete="off">
+          <input type="text" id="wcUrl" inputmode="url" placeholder="Paste a link, like polyhaven.com" aria-label="Link to add">
+          <button type="submit" class="pill small">Add</button>
+        </form>
+        <p class="hint" id="wcAddMsg" role="status"></p>
+      </section>
+      <section class="wc-step" data-step="done">
+        <ul class="wc-next" id="wcNext"></ul>
+      </section>
+      <!-- guest -->
+      <section class="wc-step" data-step="guest">
+        <ul class="wc-can">
+          <li><b>Visit spaces</b><span>Look through anyone's shared channels and open them.</span></li>
+          <li><b>Walk the plaza</b><span>Chat, wave and dance with whoever is around.</span></li>
+          <li><b>Saving a space of your own</b><span id="wcGuestAsk"></span></li>
+        </ul>
+      </section>
+    </div>
+    <div class="wc-foot">
+      <div class="wc-dots" id="wcDots" aria-hidden="true"></div>
+      <span class="hint" id="wcCount"></span>
+      <span class="spacer"></span>
+      <button type="button" class="pill small" id="wcSkip">Skip for now</button>
+      <button type="button" class="pill small" id="wcBack">Back</button>
+      <button type="button" class="pill small primary" id="wcNextBtn">Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- spotlight tour -->
+<div class="overlay" id="tour" role="dialog" aria-modal="true" aria-labelledby="trTitle">
+  <div class="tr-spot" id="trSpot"></div>
+  <div class="tr-bubble" id="trBubble">
+    <span class="paws small" aria-hidden="true"></span>
+    <div class="tr-text"><b id="trTitle"></b><p id="trBody"></p></div>
+    <div class="tr-foot">
+      <span class="hint" id="trCount"></span>
+      <span class="spacer"></span>
+      <button type="button" class="pill small" id="trSkip">Skip tour</button>
+      <button type="button" class="pill small" id="trBack">Back</button>
+      <button type="button" class="pill small primary" id="trNext">Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- check-in card -->
+<aside id="checkin" aria-label="Check-in" hidden>
+  <button type="button" class="ci-head" id="ciToggle" aria-expanded="true">
+    <span class="paws tiny" aria-hidden="true"></span>
+    <b>Check-in</b>
+    <span class="ci-meter" aria-hidden="true"><i id="ciBar"></i></span>
+    <span class="ci-count" id="ciCount"></span>
+  </button>
+  <ol class="ci-list" id="ciList"></ol>
+  <div class="ci-done" id="ciDone" hidden>
+    <p>You're all checked in. The graduation cap is waiting for you in the Avatar Clinic.</p>
+    <div class="row"><button type="button" class="pill small primary" id="ciWear">Try it on</button><button type="button" class="pill small" id="ciHide">Hide this card</button></div>
+  </div>
+</aside>

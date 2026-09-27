@@ -1,7 +1,7 @@
 /* ================= Avatar Clinic: make your plaza animal ================= */
 let clDraft = null, clView = null;
-async function openClinic() {
-  clDraft = myAvatar();
+async function openClinic(patch) {
+  clDraft = Object.assign(myAvatar(), patch || {});
   renderClinicOpts();
   $("#clStatus").textContent = mayWrite() ? "" : "Saved on this device. Others still see it in the plaza.";
   show("#clinic"); sfx("select");
@@ -11,6 +11,7 @@ async function openClinic() {
 }
 function closeClinic() {
   hide("#clinic"); sfx("back");
+  if ($("#welcome").classList.contains("open")) renderWelcome();
   if (clView) { cancelAnimationFrame(clView.raf); clView.raf = 0; }
 }
 function segRow(box, map, key) {
@@ -44,7 +45,7 @@ function renderClinicOpts() {
   });
   swatchRow($("#clFur"), FURS, "f", "Fur");
   swatchRow($("#clScrubs"), SCRUBS, "c", "Scrubs");
-  segRow($("#clHat"), HATS, "h"); segRow($("#clExtra"), EXTRAS, "x"); segRow($("#clEyes"), EYES, "e");
+  segRow($("#clHat"), Object.fromEntries(Object.entries(HATS).filter(([k]) => k !== "grad" || onb.reward || clDraft.h === "grad")), "h"); segRow($("#clExtra"), EXTRAS, "x"); segRow($("#clEyes"), EYES, "e");
   if (document.activeElement !== $("#clNick")) $("#clNick").value = clDraft.nick || "";
   $("#clTag").textContent = SPECIES[clDraft.s].n + (clDraft.h !== "none" ? " · " + HATS[clDraft.h] : "");
   if (clView) clView.rebuild();
@@ -59,6 +60,7 @@ $("#clSave").onclick = async () => {
   setPresence({ av });
   let cloud = false;
   if (mayWrite()) { try { await saveMyCard({ avatar: av }); cloud = true; } catch {} }
+  onbFlag("avatar");
   closeClinic(); sfx("complete");
   toast(cloud ? "Avatar saved. See you in the plaza." : "Avatar saved on this device.");
   renderPeopleList(); renderVisitBar();

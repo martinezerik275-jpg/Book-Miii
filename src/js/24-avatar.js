@@ -7,7 +7,7 @@ const SPECIES = {
 };
 const FURS = ["#F6D2A2", "#E9A15F", "#C77B4A", "#8C6450", "#F5F1EA", "#B9BEC8", "#6F727C", "#F2B8C6", "#A7D98C", "#F7E08A"];
 const SCRUBS = ["#79C6E8", "#8FD6B0", "#F4A6C1", "#B7A5EF", "#FFD37A", "#5E86D6", "#FF9480", "#F7F9FB"];
-const HATS = { none: "None", nurse: "Nurse cap", surgical: "Surgical cap", mirror: "Head mirror", flower: "Flower", bow: "Bow" };
+const HATS = { none: "None", nurse: "Nurse cap", surgical: "Surgical cap", mirror: "Head mirror", flower: "Flower", bow: "Bow", grad: "Graduation cap" };   // grad is earned by finishing the check-in
 const EXTRAS = { none: "None", stetho: "Stethoscope", bandage: "Bandage", glasses: "Glasses", clipboard: "Clipboard" };
 const EYES = { dot: "Round", happy: "Happy", sparkle: "Sparkly" };
 const AVATAR = { SPECIES, FURS, SCRUBS, HATS, EXTRAS, EYES };
@@ -178,6 +178,15 @@ function buildAvatar(T, raw) {
       const b = new T.Group(); b.position.set(-0.18, 0.02, 0.1); b.rotation.z = 0.3; top.add(b);
       [-1, 1].forEach(sd => mesh(new T.ConeGeometry(0.07, 0.12, 12), M("#F0607E"), 0.06 * sd, 0, 0, b).rotation.z = -Math.PI / 2 * sd);
       mesh(sph(0.035), M("#D94C6C"), 0, 0, 0, b); break;
+    }
+    case "grad": {
+      const g2 = new T.Group(); g2.position.set(0, -0.02, 0); g2.rotation.x = -0.12; top.add(g2);
+      mesh(new T.CylinderGeometry(0.22, 0.24, 0.14, 20), M("#2E3440"), 0, 0, 0, g2);
+      const board = mesh(new T.BoxGeometry(0.62, 0.035, 0.62), M("#2E3440"), 0, 0.085, 0, g2); board.rotation.y = Math.PI / 4;
+      mesh(sph(0.03), M("#F2C14E"), 0, 0.11, 0, g2);
+      mesh(new T.CylinderGeometry(0.012, 0.012, 0.26, 6), M("#F2C14E"), 0.3, -0.03, 0.05, g2);
+      mesh(sph(0.035), M("#F2C14E"), 0.3, -0.17, 0.05, g2);
+      break;
     }
   }
   // extra

@@ -30,6 +30,7 @@ function visitSpace(id, from) {
   hide("#people"); hide("#preview");
   document.body.classList.add("visiting");
   setPresence({ w: "visit" });
+  onbFlag("visit");
   resolveNames([id]).then(renderVisitBar);
   renderVisitBar();
   v.unsub = db.doc(spacePath(id)).onSnapshot(snap => {
@@ -78,30 +79,31 @@ $("#vbPlaza").onclick = () => { goHome(true); openPlaza(); };
 $("#vbStamp").onclick = () => openStamp(visiting && visiting.id);
 
 /* borrow: copy a channel (or a workflow with its steps) into my own space */
+// put a copy of someone's channel (or workflow shell) into space `mine`, reusing a matching link
+function placeIn(mine, obj) {
+  let p = mine.pages.find(pg => firstFreeIn(mine, pg.id) >= 0);
+  if (!p) { p = { id: uid(), name: "Borrowed" }; mine.pages.push(p); }
+  obj.page = p.id; obj.slot = firstFreeIn(mine, p.id); mine.channels.push(obj);
+}
+const copyFields = ch => ({ name: ch.name, desc: ch.desc || "", tags: (ch.tags || []).slice(0, 8), notes: "", icon: ch.icon || "", hue: ch.hue,
+  iconAsset: ch.iconAsset || null, iconData: ch.iconData || null, iconStyle: ch.iconStyle, iconBg: ch.iconBg || null });
+function copyChannelInto(mine, ch) {
+  const hit = mine.channels.find(x => x.kind !== "flow" && x.url && x.url === ch.url);
+  if (hit) return hit.id;
+  const n = Object.assign({ id: uid(), url: ch.url }, copyFields(ch));
+  placeIn(mine, n); return n.id;
+}
 function borrow(c) {
   const mine = homeState; if (!mine || !c) return;
   if (me.canWrite === false) { toast("Saving to your space needs Contributor access."); return; }
   const fromSpace = state;
-  const place = obj => {
-    let p = mine.pages.find(pg => firstFreeIn(mine, pg.id) >= 0);
-    if (!p) { p = { id: uid(), name: "Borrowed" }; mine.pages.push(p); }
-    obj.page = p.id; obj.slot = firstFreeIn(mine, p.id); mine.channels.push(obj);
-  };
-  const copyOf = ch => {
-    const hit = mine.channels.find(x => x.kind !== "flow" && x.url && x.url === ch.url);
-    if (hit) return hit.id;
-    const n = { id: uid(), name: ch.name, url: ch.url, desc: ch.desc || "", tags: (ch.tags || []).slice(0, 8), notes: "",
-      icon: ch.icon || "", hue: ch.hue, iconAsset: ch.iconAsset || null, iconData: ch.iconData || null, iconStyle: ch.iconStyle, iconBg: ch.iconBg || null };
-    place(n); return n.id;
-  };
   if (c.kind === "flow") {
     if (mine.channels.some(x => x.kind === "flow" && x.name === c.name)) { toast("You already have a workflow called " + c.name); return; }
-    const steps = (c.steps || []).map(st => { const ch = fromSpace.channels.find(x => x.id === st.ch); return ch ? { ch: copyOf(ch), note: st.note || "" } : null; }).filter(Boolean);
-    place({ id: uid(), kind: "flow", name: c.name, url: "", desc: c.desc || "", tags: (c.tags || []).slice(0, 8), notes: "",
-      icon: c.icon || "", hue: c.hue, iconAsset: c.iconAsset || null, iconData: c.iconData || null, iconStyle: c.iconStyle, iconBg: c.iconBg || null, steps });
+    const steps = (c.steps || []).map(st => { const ch = fromSpace.channels.find(x => x.id === st.ch); return ch ? { ch: copyChannelInto(mine, ch), note: st.note || "" } : null; }).filter(Boolean);
+    placeIn(mine, Object.assign({ id: uid(), kind: "flow", url: "", steps }, copyFields(c)));
   } else {
     if (mine.channels.some(x => x.kind !== "flow" && x.url === c.url)) { toast(c.name + " is already in your space"); return; }
-    copyOf(c);
+    copyChannelInto(mine, c);
   }
   homeState = normalize(mine);
   persist(homeState);

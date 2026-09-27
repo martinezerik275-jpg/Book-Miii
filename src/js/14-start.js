@@ -5,6 +5,7 @@ $("#start").addEventListener("click", () => {
   if (state.pages[page]) { musicWorld = pageWorld(state.pages[page].id); if (state.sound.follow === false) musicWorld = "bells"; }
   setTimeout(() => { sfx("open"); startMusic(); loadAllSfx(); }, 60);
   lastActivity = Date.now();
+  setTimeout(maybeOnboard, 450);
   const first = track.children[page]?.querySelector(".slot");
   if (first && !matchMedia("(pointer: fine)").matches) {} // leave focus alone on touch
 });

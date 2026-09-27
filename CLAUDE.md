@@ -31,6 +31,9 @@ per-person spaces and a shared 3D plaza. See `docs/ARCHITECTURE.md` for the desi
   bezel tiles, `.pill`, `.round`, `.sheet`. Reduced motion must keep working.
 - three.js is loaded lazily (`loadThree()` in `25-plaza.js`); tests serve it from node_modules.
   Keep the pinned version in `THREE_URL` in sync with `package.json`.
+- Onboarding (`27-onboarding.js`): first visits get a welcome (newcomer or visitor), the owner gets a
+  "what's new" tour, and everyone gets a check-in card. Bump `WHATS_NEW` when a release deserves a new
+  tour. Progress is in `data/users/<id>/onboarding`; tests skip it unless `openAs(..., { onboarding: true })`.
 - Add a Playwright test for any multi-user behavior; `openAs(browser, who)` gives each person their
   own context. Close contexts (`afterEach(closeAll)`) or WebGL contexts run out.
 

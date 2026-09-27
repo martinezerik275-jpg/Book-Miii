@@ -22,11 +22,12 @@ test("two people meet in the plaza, chat and emote", async ({ browser }) => {
   // walking moves her avatar on the owner's screen
   const before = await owner.evaluate(() => [...window.__sm.plaza.others.values()][0].tz);
   await maya.locator("#pzCanvas").focus();
+  // first visit: she arrives facing Dr. Paws and the clinic, so "forward" is south
   const z0 = await maya.evaluate(() => window.__sm.plaza.me3.z);
   await maya.keyboard.down("w"); await maya.waitForTimeout(1500); await maya.keyboard.up("w");
   const z1 = await maya.evaluate(() => window.__sm.plaza.me3.z);
-  expect(z1).toBeLessThan(z0 - 0.5);                                   // she walked north
-  await expect.poll(() => owner.evaluate(() => [...window.__sm.plaza.others.values()][0].tz)).toBeLessThan(before - 0.5);
+  expect(z1).toBeGreaterThan(z0 + 0.3);
+  await expect.poll(() => owner.evaluate(() => [...window.__sm.plaza.others.values()][0].tz)).toBeGreaterThan(before + 0.3);
 
   // chat bubble + log
   await maya.fill("#pzSay", "hi from the clinic!");

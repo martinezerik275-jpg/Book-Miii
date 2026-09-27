@@ -69,7 +69,7 @@ $("#skForm").onsubmit = async e => {
     const stamps = Object.assign({}, cur.stamps || {}, { [id]: { s: stampPick, note: $("#skNote").value.trim().slice(0, 80), at: Date.now() } });
     const to = [...new Set([...(cur.to || []), id])].slice(-200);
     await ref2.set({ to, stamps });
-    hide("#stampSheet"); sfx("complete"); toast("Stamped " + spaceTitle(id));
+    hide("#stampSheet"); sfx("complete"); toast("Stamped " + spaceTitle(id)); onbFlag("stamp");
   } catch { sfx("error"); toast("Couldn't leave the stamp. Your access may be view-only."); }
   finally { btn.disabled = false; }
 };

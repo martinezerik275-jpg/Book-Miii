@@ -25,7 +25,9 @@ export async function docs(request) { return (await request.get("/mock/docs")).j
 // Open the page as one person in their own browser context (own storage, own peer).
 const open = [];
 export async function closeAll() { while (open.length) await open.pop().close(); }
-export async function openAs(browser, who, { viewport } = {}) {
+// By default people have already been welcomed, so older tests aren't interrupted;
+// pass { onboarding: true } to meet the welcome as a first-time visitor.
+export async function openAs(browser, who, { viewport, onboarding = false, begin = true } = {}) {
   const ctx = await browser.newContext({ viewport: viewport || { width: 1280, height: 800 } });
   open.push(ctx);
   const page = await ctx.newPage();
@@ -35,7 +37,11 @@ export async function openAs(browser, who, { viewport } = {}) {
   await page.route(/fonts\.(googleapis|gstatic)\.com/, r => r.fulfill({ status: 200, contentType: "text/css", body: "" }));
   await page.addInitScript(cfg => { window.__MOCK = cfg; }, who);
   await page.addInitScript({ path: new URL("./harness/claude-mock.js", import.meta.url).pathname });
+  if (!onboarding) await page.addInitScript(id => {
+    localStorage.setItem("studio-menu-onboard:" + (id || "anon"), JSON.stringify({ welcomed: 1, whatsNew: 99, hideList: true, flags: {} }));
+  }, who.uid);
   await page.goto("/?test");
+  if (!begin) return page;
   await page.click("#beginBtn");
   if (who.uid) await expect.poll(() => page.evaluate(() => window.__sm && window.__sm.me.id)).toBe(who.uid);
   return page;

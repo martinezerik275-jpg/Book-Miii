@@ -20,6 +20,7 @@ async function openPlaza() {
   try { if (!plaza) plaza = createPlaza(T); }
   catch { $("#pzLoadText").textContent = "This browser can't show the 3D plaza (WebGL is off)."; return; }
   plaza.start();
+  onbFlag("plaza");
   $("#pzLoading").hidden = true;
   plazaReturnWorld = musicWorld; setMusicWorld("pluck");
   setTimeout(() => $("#pzCanvas").focus({ preventScroll: true }), 30);
@@ -251,6 +252,30 @@ function createPlaza(T) {
     }
   }
 
+  /* ---- Dr. Paws: the resident guide by the clinic door ---- */
+  const paws = { g: buildAvatar(T, { s: "dog", f: "#F6D2A2", c: "#F7F9FB", h: "mirror", x: "stetho", e: "happy" }), ui: makeLabel(), x: 2.4, z: 15.6, tip: 0, next: 0, bubbleT: 0, greeted: false };
+  paws.g.position.set(paws.x, 0, paws.z); paws.g.rotation.y = Math.PI; scene.add(paws.g);
+  paws.ui.l.classList.add("npc");
+  colliders.push({ x: paws.x, z: paws.z, r: 0.45 });
+  const PAWS_TIPS = [
+    "Welcome to the plaza! Walk with WASD or the arrow keys, or click the ground.",
+    "Step through the clinic door behind me to change your look.",
+    "Every house belongs to a neighbor. Walk up to a door to visit their space.",
+    "Press Enter to chat, and 1 to 5 to emote. Try a dance!",
+    "Take a photo with the button up top. Everyone here ends up in it.",
+  ];
+  function updatePaws(now, dt) {
+    const d = Math.hypot(me3.x - paws.x, me3.z - paws.z);
+    const want = d < 8 ? Math.atan2(me3.x - paws.x, me3.z - paws.z) : Math.PI;   // turn toward whoever comes close
+    let dr = want - paws.g.rotation.y; dr = Math.atan2(Math.sin(dr), Math.cos(dr)); paws.g.rotation.y += dr * Math.min(1, dt * 4);
+    if (d < 6 && now > paws.next) {
+      if (!paws.greeted) { paws.greeted = true; playEmote(paws.g, "wave"); }
+      paws.ui.b.textContent = PAWS_TIPS[paws.tip % PAWS_TIPS.length]; paws.tip++;
+      paws.bubbleT = now + 6000; paws.next = now + 7000;
+    }
+    animateAvatar(paws.g, clock, dt, 0);
+  }
+
   /* ---- my actions ---- */
   function emote(k) {
     ensureMine(); me3.emoteN++;
@@ -264,6 +289,7 @@ function createPlaza(T) {
     lastSay = Date.now(); me3.sayN++;
     setPresence({ say: { t: text, n: me3.sayN } });
     showBubble(me3, text); logLine(personName(me.id, "You") + " (you)", text); sfx("tick");
+    onbFlag("say");
   }
   $("#pzChat").onsubmit = e => { e.preventDefault(); say($("#pzSay").value); $("#pzSay").value = ""; $("#pzCanvas").focus({ preventScroll: true }); };
   $("#pzEmotes").onclick = e => { const b = e.target.closest("[data-e]"); if (b) emote(b.dataset.e); };
@@ -305,6 +331,7 @@ function createPlaza(T) {
       if (dd < 0.75 && ray.ray.origin.distanceTo(c) < best) { best = ray.ray.origin.distanceTo(c); hit = peer; }
     });
     if (hit) { openCard(hit); return; }
+    if (ray.ray.distanceToPoint(new T.Vector3(paws.x, 0.8, paws.z)) < 0.75) { paws.next = 0; sfx("select"); return; }   // tap Dr. Paws: next tip
     hideCard();
     const pt = new T.Vector3(); if (ray.ray.intersectPlane(groundPlane, pt)) walkTo = { x: clampW(pt.x), z: clampW(pt.z) };
   });
@@ -385,6 +412,7 @@ function createPlaza(T) {
       o.g.position.set(o.x, 0, o.z); o.g.rotation.y = o.ry;
       animateAvatar(o.g, clock, dt, o.mv);
     });
+    updatePaws(now, dt);
     // camera follows, pulled in front of any wall between it and me
     const off = tmpV.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
     let d = dist;
@@ -422,6 +450,7 @@ function createPlaza(T) {
     else { ui.b.hidden = false; ui.b.style.transform = `translate(${x}px,${y - 34}px) translate(-50%,-100%)`; }
   }
   function placeLabels(now) {
+    placeLabel(paws.ui, paws.g, "Dr. Paws", "Clinic guide", now, paws.bubbleT);
     placeLabel(me3.ui, me3.g, personName(me.id, "You"), myStatus.k !== "around" ? STATUS[myStatus.k] : "", now, me3.bubbleT);
     others.forEach(o => { if (o.g) placeLabel(o.ui, o.g, whoIs(o), (statusLine(o.pr) || "").replace(/^In the plaza( · )?/, ""), now, muted.has(o.by) ? 0 : o.bubbleT); });
   }
@@ -461,12 +490,14 @@ function createPlaza(T) {
     applySky(); resize(); rebuildHouses(); ensureMine(); syncPeers();
     // arrive between the clinic and the fountain, facing the fountain
     if (!me3.placed) { me3.placed = true; me3.x = (Math.random() - 0.5) * 3; me3.z = 7; me3.ry = Math.PI; yaw = 0; }
+    // first time ever: arrive facing the clinic, where Dr. Paws is waiting
+    if (!onb.flags.plaza && !me3.metPaws) { me3.metPaws = true; me3.x = 0; me3.z = 10.5; me3.ry = 0; yaw = Math.PI; }
     setPresence({ w: "plaza", av: encodeAvatar(myAvatar()), p: [me3.x, me3.z, me3.ry].map(v => Math.round(v * 100) / 100), m: 0 });
-    camera.position.set(me3.x, 5, me3.z + 8);
+    camera.position.set(me3.x + Math.sin(yaw) * 8, 5, me3.z + Math.cos(yaw) * 8);
     last = 0; cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
   }
   function stop() { cancelAnimationFrame(raf); raf = 0; keys.clear(); hideCard(); }
-  return { start, stop, syncPeers, rebuildHouses, photo, emote, say, get running() { return !!raf; }, get others() { return others; }, get me3() { return me3; } };
+  return { start, stop, syncPeers, rebuildHouses, photo, emote, say, get running() { return !!raf; }, get others() { return others; }, get me3() { return me3; }, get paws() { return paws; } };
 }
 // inner ring skips due south, where the clinic's path runs; the outer ring sits between
 const HOUSE_SLOTS = [
