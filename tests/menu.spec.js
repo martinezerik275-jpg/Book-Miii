@@ -93,13 +93,22 @@ test("a view-only guest can visit but not save", async ({ browser, request }) =>
   expect(Object.keys(await docs(request)).filter(k => k.includes("u_leo"))).toEqual([]);
 });
 
-test("phone width: no sideways scroll", async ({ browser }) => {
-  const page = await openAs(browser, OWNER, { viewport: { width: 390, height: 780 } });
+for (const width of [390, 360]) test(`phone width ${width}: no sideways scroll, clock clear of the buttons`, async ({ browser }) => {
+  const page = await openAs(browser, OWNER, { viewport: { width, height: 780 } });
+  // the widest clock and date the deck ever shows, whatever time the test runs
+  await page.evaluate(() => { document.querySelector("#time").textContent = "12:58"; document.querySelector("#date").textContent = "Wed, 12/28"; });
   // nothing laid out past the right edge, and the page can't be scrolled sideways
   const past = await page.evaluate(() => [...document.querySelectorAll("#app *")].filter(e => e.getBoundingClientRect().right > innerWidth + 1).length);
   expect(past).toBe(0);
   expect(await page.evaluate(() => { scrollTo(200, 0); return scrollX; })).toBe(0);
-  await page.screenshot({ path: "test-results/menu-phone.png" });
+  // the clock text sits between the two button clusters
+  const gap = await page.evaluate(() => {
+    const [l, r] = [...document.querySelectorAll(".deck .cluster")].map(c => c.getBoundingClientRect());
+    const t = ["#time", "#date"].map(s => { const g = document.createRange(); g.selectNodeContents(document.querySelector(s)); return g.getBoundingClientRect(); });
+    return Math.min(...t.map(b => b.left - l.right), ...t.map(b => r.left - b.right));
+  });
+  expect(gap).toBeGreaterThanOrEqual(0);
+  if (width === 390) await page.screenshot({ path: "test-results/menu-phone.png" });
 });
 
 test("status and 'working in' show up for neighbors", async ({ browser }) => {

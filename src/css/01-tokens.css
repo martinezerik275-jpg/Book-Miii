@@ -1,4 +1,5 @@
 :root{
+  color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
@@ -23,9 +24,11 @@
     --deck:#1A2029; --deck-edge:#2D3641;
     --panel:#1C232C; --field:#151B22; --line:#2E3742;
     --shadow:rgba(0,0,0,.45); --empty:rgba(255,255,255,.03);
+    color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
+  color-scheme:dark;
   --bg:#131820; --stripe:rgba(255,255,255,.022);
   --tile:#1F2630; --bezel:#333D49; --bezel-hi:#46515E;
   --ink:#DDE4EC; --ink-soft:#8D98A5;
@@ -41,6 +44,8 @@ body{
   margin:0;height:100%;overflow:hidden;background:var(--bg);
   background-image:repeating-linear-gradient(0deg,var(--stripe) 0 2px,transparent 2px 6px);
   -webkit-font-smoothing:antialiased; user-select:none;
+  /* the artifact host styles body with its own font and near-black text; take them back from the tokens */
+  font-family:var(--font); font-size:16px; color:var(--ink);
 }
 button,input,textarea,select{font-family:inherit;color:inherit}
 button{cursor:pointer}

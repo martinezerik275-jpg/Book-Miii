@@ -49,11 +49,21 @@ function file(res, p) {
   res.end(readFileSync(p));
 }
 
+// claude.ai publishes the page inside its own skeleton, whose styles come first. Serve the same so
+// anything the page forgets to set (body text colour, font, color-scheme) shows up here too.
+const SKELETON = "<style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}</style>";
+function page(res) {
+  const p = join(root, "dist/studio-menu.html");
+  if (!existsSync(p)) { res.writeHead(404); return res.end("not found"); }
+  res.writeHead(200, { "content-type": TYPES[".html"], "cache-control": "no-store" });
+  res.end(readFileSync(p, "utf8").replace(/<head>/i, "<head>" + SKELETON));
+}
+
 createServer(async (req, res) => {
   const u = new URL(req.url, "http://x");
   const q = Object.fromEntries(u.searchParams);
   try {
-    if (u.pathname === "/" || u.pathname === "/index.html") return file(res, join(root, "dist/studio-menu.html"));
+    if (u.pathname === "/" || u.pathname === "/index.html") return page(res);
     if (u.pathname === "/mock/claude-mock.js") return file(res, join(root, "tests/harness/claude-mock.js"));
     if (u.pathname.startsWith("/vendor/three/")) return file(res, join(root, "node_modules/three/build", u.pathname.slice(14)));
 

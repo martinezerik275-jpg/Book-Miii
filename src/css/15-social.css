@@ -136,9 +136,9 @@ body.visiting #editBtn,body.visiting #settingsBtn{opacity:.35;pointer-events:non
   #idleBtn,#keysBtn{display:none}
   .deck{padding-inline:10px}
   .cluster{gap:6px}
-  .round{width:46px}
-  .clock .time{font-size:28px}
-  .clock .date{font-size:12px}
+  .round{width:clamp(40px,11.5vw,46px)}
+  .clock .time{font-size:24px;letter-spacing:0}   /* "12:58" has to fit between the clusters at 360px */
+  .clock .date{font-size:12px;white-space:nowrap}
 }
 .clock .date[data-focus="1"]{color:var(--sel);font-weight:800}
 /* sheets that can open on top of the plaza */
